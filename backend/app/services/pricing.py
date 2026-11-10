@@ -31,6 +31,10 @@ PRICE_UNIT = "FCFA/kg"
 # Le prototype affiche une courbe de démonstration (RM3).
 IS_DEMO = True
 
+# Prix de référence de démonstration (FCFA/kg), repris de la maquette.
+# À remplacer par la série ICCO/CICC lors de la calibration de la formule.
+REFERENCE_PRICE_FCFA_PER_KG = 1050.0
+
 
 @dataclass(frozen=True)
 class PricePoint:

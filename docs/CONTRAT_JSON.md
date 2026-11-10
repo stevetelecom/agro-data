@@ -185,6 +185,10 @@ Alimente les quatre cartes et le graphique d'humidité de l'écran 2 de la maque
 
 Les seuils de `level` sont ceux de la maquette et de RM2 : la couleur de la pastille en dépend (`--ok`, `--mod`, `--ko`).
 
+- `days` est compris entre 1 et 30 (défaut 7) ; `plot_id` restreint le calcul à une parcelle.
+- Un appareil non rattaché à une parcelle forme sa propre série : `plot_id` vaut `0` et `plot_name` reprend le `device_id`. Le simulateur reste ainsi utilisable sans créer de parcelle au préalable.
+- `humidity_series` ne contient que les parcelles ayant au moins une mesure dans la fenêtre ; `plots_monitored` compte ces séries.
+
 ### 4.5 Courbe de prix prédictive — `GET /api/v1/prices/forecast`
 
 Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `days` (défaut `7`).
@@ -197,12 +201,12 @@ Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `
   "formula_version": "v1",
   "points": [
     { "date": "2026-11-04", "reference_price": 1050, "adjusted_price": 1050 },
-    { "date": "2026-11-05", "reference_price": 1060, "adjusted_price": 1065 },
-    { "date": "2026-11-06", "reference_price": 1055, "adjusted_price": 1070 },
-    { "date": "2026-11-07", "reference_price": 1070, "adjusted_price": 1100 },
-    { "date": "2026-11-08", "reference_price": 1065, "adjusted_price": 1120 },
-    { "date": "2026-11-09", "reference_price": 1080, "adjusted_price": 1160 },
-    { "date": "2026-11-10", "reference_price": 1085, "adjusted_price": 1185 }
+    { "date": "2026-11-05", "reference_price": 1050, "adjusted_price": 1062.6 },
+    { "date": "2026-11-06", "reference_price": 1050, "adjusted_price": 1072.05 },
+    { "date": "2026-11-07", "reference_price": 1050, "adjusted_price": 1094.1 },
+    { "date": "2026-11-08", "reference_price": 1050, "adjusted_price": 1116.15 },
+    { "date": "2026-11-09", "reference_price": 1050, "adjusted_price": 1136.63 },
+    { "date": "2026-11-10", "reference_price": 1050, "adjusted_price": 1147.65 }
   ]
 }
 ```
@@ -211,6 +215,9 @@ Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `
 - Formule v1 : `adjusted_price = reference_price × (1 + 0,15 × indice / 100)`. Le coefficient `0,15` est défini dans `backend/app/services/pricing.py` et reste à calibrer avec les données ICCO/CICC.
 - `is_demo` reste à `true` tant que les coefficients ne sont pas calibrés : le dashboard **doit** afficher la mention « courbe de démonstration ».
 - `formula_version` est journalisé avec chaque calcul (RM5, audit).
+- Le prix de référence de démonstration est constant : `REFERENCE_PRICE_FCFA_PER_KG = 1050` FCFA/kg (`pricing.py`). Il sera remplacé par la série ICCO/CICC lors de la calibration.
+- Chaque jour de la courbe porte l'indice d'infestation calculé sur une fenêtre glissante de 48 h se terminant à la fin de ce jour (RM2) : sans recouvrement, une journée seule ne pourrait jamais atteindre le seuil de 48 h au-dessus de 85 %.
+- `days` est compris entre 1 et 30 (défaut 7).
 
 ### 4.6 Parcelles — `/api/v1/plots`
 

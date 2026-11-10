@@ -18,6 +18,13 @@ from app.schemas.measurement import (
     MeasurementCreate,
     MeasurementRead,
 )
+from app.schemas.indicators import (
+    HumidityPoint,
+    HumiditySeries,
+    KpisRead,
+    PriceForecastRead,
+    PricePointRead,
+)
 
 __all__ = [
     "ClimateData",
@@ -35,4 +42,9 @@ __all__ = [
     "SubscriberCreate",
     "SubscriberRead",
     "SubscriberUpdate",
+    "HumidityPoint",
+    "HumiditySeries",
+    "KpisRead",
+    "PriceForecastRead",
+    "PricePointRead",
 ]

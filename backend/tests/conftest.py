@@ -71,6 +71,24 @@ def client(tmp_path, monkeypatch):
 
 
 @pytest.fixture()
+def db_session():
+    """Session SQLAlchemy isolée (SQLite mémoire) pour tester les services."""
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    Base.metadata.create_all(bind=engine)
+    session = TestingSessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+        Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture()
 def api_headers() -> dict[str, str]:
     return {"X-API-Key": "test-device-key"}
 
