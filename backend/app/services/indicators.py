@@ -190,14 +190,20 @@ def build_kpis(
     humidite_moyenne = _mean([row.air_humidity_pct for row in rows])
 
     rows_precedents = _query_rows(db, debut - days * SECONDS_PER_DAY, debut, plot_id)
-    humidite_precedente = _mean([row.air_humidity_pct for row in rows_precedents])
+    if rows_precedents:
+        humidite_precedente = _mean([row.air_humidity_pct for row in rows_precedents])
+        delta_humidite = humidite_moyenne - humidite_precedente
+    else:
+        # Sans historique, l'écart n'est pas mesurable : on affiche 0 plutôt
+        # qu'une hausse artificielle de toute la moyenne courante.
+        delta_humidite = 0.0
 
     return {
         "global_infestation_index": index_global,
         "level": level_for(index_global),
         "active_alerts": sum(1 for groupe in groupes if groupe.under_alert),
         "avg_air_humidity_pct": round(humidite_moyenne, 1),
-        "humidity_delta_7d": round(humidite_moyenne - humidite_precedente, 1),
+        "humidity_delta_7d": round(delta_humidite, 1),
         "estimated_healthy_volume_pct": estimated_healthy_volume_pct(index_global),
         "plots_monitored": len(groupes),
         "generated_at": datetime.fromtimestamp(fin, tz=timezone.utc)

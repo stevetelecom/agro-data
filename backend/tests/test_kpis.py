@@ -97,6 +97,8 @@ def test_alerte_apres_48h_au_dessus_de_85(db_session):
     # 60 x min(1, 48/48) + 40 x 0 = 60
     assert kpis["global_infestation_index"] == 60
     assert kpis["level"] == "modere"
+    # Aucune mesure sur les 7 jours précédents : l'écart n'est pas mesurable.
+    assert kpis["humidity_delta_7d"] == 0.0
 
 
 def test_pas_d_alerte_avant_48h(db_session):
