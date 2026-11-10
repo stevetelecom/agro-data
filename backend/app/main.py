@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import SessionLocal, init_db
-from app.routers import auth, devices, kpis, measurements, plots, subscribers
+from app.routers import auth, devices, diagnostic, kpis, measurements, plots, subscribers
 from app.seed import ensure_demo_user
 
 
@@ -54,6 +54,7 @@ def create_app() -> FastAPI:
     application.include_router(devices.router)
     application.include_router(subscribers.router)
     application.include_router(kpis.router)
+    application.include_router(diagnostic.router)
 
     @application.get("/health")
     def health() -> dict[str, str]:

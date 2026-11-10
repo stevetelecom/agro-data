@@ -269,6 +269,8 @@ Le formulaire de la maquette laisse saisir `hours_above_85` et `ia_detection_rat
 - `confidence` : 0 à 1 ; la maquette l'affiche en pourcentage.
 - `is_demo` : `true` tant que le modèle n'est pas entraîné sur un jeu d'images validé.
 - Une image illisible ou d'un autre type que JPEG/PNG → `422`.
+- Le seuil de décision est configurable via la variable d'environnement `IA_DETECTION_THRESHOLD` (défaut `0.5`, BF2.5). Le prototype actuel (`ai/infer.py`) valide l'image puis produit un score **déterministe** à partir de son empreinte SHA-256 : ce n'est pas un modèle entraîné, d'où `is_demo: true`.
+- `ai/train.py` fournit le script de transfert d'apprentissage MobileNetV2 ; il n'est pas exécuté par la CI (TensorFlow et jeu d'images validé par le PO requis). La précision mesurée devra être reportée dans `ai/model/metrics.json` et citée sans surpromesse dans le dossier final.
 
 ### 4.8 Comptes de démonstration
 

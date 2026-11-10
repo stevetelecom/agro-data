@@ -25,6 +25,7 @@ from app.schemas.indicators import (
     PriceForecastRead,
     PricePointRead,
 )
+from app.schemas.diagnostic import DiagnosticRead
 
 __all__ = [
     "ClimateData",
@@ -47,4 +48,5 @@ __all__ = [
     "KpisRead",
     "PriceForecastRead",
     "PricePointRead",
+    "DiagnosticRead",
 ]

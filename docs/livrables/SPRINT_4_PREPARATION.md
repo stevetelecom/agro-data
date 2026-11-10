@@ -67,12 +67,12 @@ Durée visée : 10 minutes.
 
 | # | Critère | Ticket | Statut au 10/11 |
 |---|---|---|---|
-| 1 | Un message JSON conforme arrive dans le Data Lake | #5, #6 | 🟡 code en PR #25, simulateur non fait |
+| 1 | Un message JSON conforme arrive dans le Data Lake | #5, #6 | 🟡 ingestion livrée (PR #25), simulateur non fait |
 | 2 | Une coupure réseau ne perd aucune mesure | #12 | ❌ non commencé |
-| 3 | Plus de 48 h au-dessus de 85 % déclenche une alerte | #13 | 🟡 service testé, route bloquée |
-| 4 | Le prototype IA renvoie un drapeau et un score | #14 | ❌ non commencé |
-| 5 | L'acheteur voit les KPIs et obtient les mêmes données par l'API | #15, #16, #18 | ❌ non commencé |
-| 6 | Les entrées invalides ou malveillantes sont rejetées | #5, #10 | 🟡 tests en PR #25 |
+| 3 | Plus de 48 h au-dessus de 85 % déclenche une alerte | #13 | ✅ service + routes `/kpis` et `/prices/forecast` livrés, 77 tests |
+| 4 | Le prototype IA renvoie un drapeau et un score | #14 | 🟡 route `POST /diagnostic` livrée (stub déterministe, `is_demo: true`), modèle non entraîné |
+| 5 | L'acheteur voit les KPIs et obtient les mêmes données par l'API | #15, #16, #18 | 🟡 page KPIs livrée, branchement API réel à faire (#16) |
+| 6 | Les entrées invalides ou malveillantes sont rejetées | #5, #10 | ✅ pipeline, `device_id` contraint, zone brute chiffrée |
 | 7 | Chaque action de gestion affiche un toast | #22 | ❌ non commencé |
 | 8 | L'historique Git montre le travail de chaque membre | #1, #3, #24 | ✅ |
 
