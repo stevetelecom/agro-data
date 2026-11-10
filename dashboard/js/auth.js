@@ -1,0 +1,205 @@
+/**
+ * Rôle : session, bascule d'affichage du mot de passe, écran de connexion.
+ * Auteur : NEGOUE Patrick
+ * Bloc : B (MOD-B4)
+ */
+
+import { apiBase } from "./env.js";
+import { showToast } from "./toast.js";
+
+const SESSION_KEY = "agro_session";
+const PASSWORD_MIN_LENGTH = 8;
+
+const DEMO_USERS = [
+  { email: "admin@agrodata.local", password: "Admin2026!", name: "Administration", role: "admin" },
+  { email: "acheteur@agrodata.local", password: "Acheteur2026!", name: "Acheteur Ebolowa", role: "acheteur" },
+];
+
+/**
+ * Lit la session courante dans le navigateur.
+ * @returns {{email: string, name: string, role: string, token: string, mode: string} | null}
+ */
+export function getSession() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Efface la session locale.
+ */
+export function logout() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+/**
+ * Enregistre la session après une connexion acceptée.
+ * @param {{email: string, name: string, role: string, token: string, mode: string}} session
+ */
+function saveSession(session) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+/**
+ * Contrôle les champs du formulaire avant tout appel réseau.
+ * Le mot de passe doit contenir au moins 8 caractères.
+ * @param {string} email
+ * @param {string} password
+ * @returns {string | null} message d'erreur, ou null si la saisie est acceptable
+ */
+export function validateLogin(email, password) {
+  const identity = String(email ?? "").trim();
+  const secret = String(password ?? "");
+  if (!identity || !secret) return "Indiquez l'e-mail et le mot de passe.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity)) return "Indiquez un e-mail valide.";
+  if (secret.length < PASSWORD_MIN_LENGTH) return "Le mot de passe doit contenir au moins 8 caractères.";
+  return null;
+}
+
+/**
+ * Décrit l'état du champ après un clic sur l'icône afficher / masquer.
+ * @param {boolean} showing vrai si le mot de passe est déjà visible
+ * @returns {{type: string, pressed: string, label: string, icon: string}}
+ */
+export function togglePasswordState(showing) {
+  if (showing) {
+    return {
+      type: "password",
+      pressed: "false",
+      label: "Afficher le mot de passe",
+      icon: "visibility",
+    };
+  }
+  return {
+    type: "text",
+    pressed: "true",
+    label: "Masquer le mot de passe",
+    icon: "visibility_off",
+  };
+}
+
+/**
+ * Ouvre une session via l'API, ou via les comptes de démonstration si l'API ne répond pas.
+ * @param {string} email
+ * @param {string} password
+ */
+export async function login(email, password) {
+  const problem = validateLogin(email, password);
+  if (problem) throw new Error(problem);
+
+  const identity = String(email ?? "").trim().toLowerCase();
+  const secret = String(password ?? "");
+
+  try {
+    const response = await fetch(`${await apiBase()}/api/v1/auth/login`, {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ email: identity, password: secret }),
+      signal: AbortSignal.timeout(2500),
+    });
+    if (response.status === 401 || response.status === 403 || response.status === 422) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload.message || "Identifiants refusés.");
+    }
+    if (response.ok) {
+      const payload = await response.json();
+      const token = payload.access_token || payload.token;
+      if (!token) throw new Error("La connexion n'a pas abouti. Réessayez.");
+      const user = payload.user || {};
+      saveSession({
+        email: user.email || identity,
+        name: user.name || identity,
+        role: user.role === "admin" ? "admin" : "acheteur",
+        token,
+        mode: "api",
+      });
+      return;
+    }
+  } catch (error) {
+    if (error.message === "Identifiants refusés." || error.message === "La connexion n'a pas abouti. Réessayez.") {
+      throw error;
+    }
+  }
+
+  const demo = DEMO_USERS.find((user) => user.email === identity && user.password === secret);
+  if (!demo) throw new Error("Identifiants refusés.");
+  saveSession({
+    email: demo.email,
+    name: demo.name,
+    role: demo.role,
+    token: "demo",
+    mode: "demo",
+  });
+}
+
+/**
+ * Branche les boutons qui affichent ou masquent un mot de passe.
+ * @param {ParentNode} root
+ */
+export function bindPasswordToggles(root = document) {
+  root.querySelectorAll("[data-toggle-password]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const input = root.querySelector(button.dataset.togglePassword);
+      if (!input) return;
+      const next = togglePasswordState(input.type === "text");
+      input.type = next.type;
+      button.setAttribute("aria-pressed", next.pressed);
+      button.setAttribute("aria-label", next.label);
+      const icon = button.querySelector(".material-symbols-outlined");
+      if (icon) icon.textContent = next.icon;
+    });
+  });
+}
+
+/**
+ * Affiche une erreur de formulaire et réactive le bouton d'envoi.
+ * @param {HTMLElement | null} error
+ * @param {HTMLButtonElement | null} submit
+ * @param {string} message
+ */
+function showLoginError(error, submit, message) {
+  if (error) {
+    error.textContent = message;
+    error.hidden = false;
+  }
+  if (submit) submit.disabled = false;
+}
+
+/**
+ * Relie le formulaire de la page de connexion.
+ */
+function bindLoginPage() {
+  const form = document.querySelector("#login-form");
+  if (!form) return;
+  if (getSession()) {
+    location.replace("app.html");
+    return;
+  }
+  bindPasswordToggles(document);
+  const error = document.querySelector("#login-error");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    error.hidden = true;
+    const submit = form.querySelector("[type=submit]");
+    const problem = validateLogin(form.email.value, form.password.value);
+    if (problem) {
+      showLoginError(error, submit, problem);
+      return;
+    }
+    submit.disabled = true;
+    try {
+      await login(form.email.value, form.password.value);
+      showToast("Connexion acceptée.");
+      window.setTimeout(() => location.replace("app.html"), 350);
+    } catch (reason) {
+      showLoginError(error, submit, reason.message || "Connexion impossible.");
+    }
+  });
+}
+
+if (typeof document !== "undefined") {
+  bindLoginPage();
+}

@@ -288,6 +288,7 @@ Rituels : Sprint Planning en début de semaine, Daily Scrum, Sprint Review avec 
 7. Chaque action de gestion affiche une notification de confirmation.
 8. L'historique Git montre le travail de chaque membre, sprint après sprint.
 
+
 ## 18. Risques
 
 | Risque | Probabilité | Impact | Réponse |
