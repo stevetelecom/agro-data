@@ -1,7 +1,7 @@
 # Design system — AGRO-DATA
 
 **Source** : `maquettes/agro-data-maquette.html` (commit `10e7d3b`)
-**Version** : 1.0
+**Version** : 1.1
 **Auteur de la maquette** : MEKONTSO Olivier Steve (MOD-B1 / B2)
 **Implémentation** : `dashboard/css/tokens.css`
 **Références** : cahier des charges §14 (interface), §13 (sécurité), plan §1.2 (MOD-B1)
@@ -114,6 +114,8 @@ Grille : `gap: 16px` ; KPI `repeat(auto-fit, minmax(210px, 1fr))` ; graphiques `
 
 Navigation : 5 entrées maximum, dont 4 visibles en permanence (CDC ENF-U9). L'entrée active porte une barre `--or` à gauche.
 
+**État d'implémentation** : les écrans 2 et 5 sont codés dans `dashboard/app.html` (issue #15), avec `dashboard/css/app.css` et `dashboard/js/kpis.js`. Les écrans 1, 3, 4 et 6 restent à intégrer (#8, #14, #16, #22). La page tente `GET /api/v1/kpis` puis bascule sur un jeu de démonstration conforme au contrat si l'API n'est pas joignable : elle est démontrable sans backend.
+
 ---
 
 ## 6. Responsive
@@ -138,11 +140,11 @@ Les zones tactiles respectent `env(safe-area-inset-*)` en haut et en bas (encoch
 | Toast de confirmation après chaque action (§14) | ✅ |
 | Interface producteur zéro-texte, vert/orange/rouge (§14) | ✅ |
 | Champ mot de passe avec œil (§13) | ✅ |
-| Focus clavier visible | ⚠️ absent de la maquette |
-| `prefers-reduced-motion` | ⚠️ absent (animations `in .25s`, `transform`) |
-| Contraste AA | ⚠️ à vérifier : `--gris` sur `--fond` et texte blanc sur `--or` |
+| Focus clavier visible | ✅ depuis `dashboard/css/app.css` (`:focus-visible`, lien d'évitement) |
+| `prefers-reduced-motion` | ✅ depuis `dashboard/css/app.css` |
+| Contraste AA | ✅ vérifié : `--gris` sur `--fond` = 5,4:1 ; texte blanc sur `--or` corrigé en encre sur `--mod` = 5,5:1 ; blanc sur `--ok` = 4,7:1 ; blanc sur `--ko` = 6,3:1 |
 
-Les trois ⚠️ sont à traiter lors du passage en code (#16).
+Les trois points d'accessibilité sont traités dans `dashboard/css/app.css` (issue #15) : la maquette reste la référence visuelle, mais le code ajoute le focus visible, le respect de `prefers-reduced-motion` et le correctif de contraste de la pastille « modéré ». La page KPIs ajoute aussi une alternative textuelle aux graphiques (`<details>` avec le tableau des valeurs) et des noms accessibles aux boutons de la vue producteur.
 
 ---
 
@@ -158,6 +160,7 @@ Les trois ⚠️ sont à traiter lors du passage en code (#16).
 | Taux de détection IA | saisi dans le formulaire | non stocké | calculé à partir des mesures, en lecture seule (#13) |
 | Graphiques | SVG écrits à la main | — | remplacer par Chart.js (#16) |
 | Tableaux | `<table>` statique | — | remplacer par jQWidgets (#16) |
+| Température sur la vue producteur | `27 °C` en gros bouton | `climate.temperature_c` est ingéré, mais `/kpis` n'expose pas de moyenne de température | **décision #15** : afficher les **alertes actives** à la place, sans changer le contrat ; si le besoin est confirmé, ajouter `avg_air_temperature_c` à `/kpis` (évolution mineure, contrat §7) |
 | CORS | — | absent | activer `CORSMiddleware` (point 4 de la revue #25) |
 
 ---
@@ -167,3 +170,4 @@ Les trois ⚠️ sont à traiter lors du passage en code (#16).
 | Version | Date | Auteur | Changement |
 |---|---|---|---|
 | 1.0 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Extraction des jetons, composants et écrans depuis la maquette `agro-data-maquette.html` |
+| 1.1 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Écrans 2 et 5 implémentés (`dashboard/app.html`), accessibilité traitée, écart température documenté (#15) |
