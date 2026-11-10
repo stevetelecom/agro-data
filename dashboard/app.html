@@ -2,14 +2,69 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AGRO-DATA - Dashboard</title>
-  <!-- TODO (issues #15, #16 et #22) : KPIs, graphiques, tableau, modals et toasts. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AGRO-DATA - Tableau de bord</title>
+  <meta name="description" content="Indicateurs de risque de pourriture brune du cacao, Ambam, Cameroun.">
+  <!-- Écrans 2 et 5 de la maquette (docs/DESIGN_SYSTEM.md §5). Issues #15, #16, #21. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,300..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="js/kpis.js" defer></script>
 </head>
 <body>
-  <main>
-    <h1>AGRO-DATA</h1>
-    <p>Dashboard (squelette).</p>
-  </main>
+  <a class="saut" href="#vue">Aller au contenu principal</a>
+
+  <div id="app">
+    <aside>
+      <div class="logo">
+        <i aria-hidden="true"><span class="ms">spa</span></i>
+        <div>
+          <b>AGRO-DATA</b>
+          <small>DAAS CACAO</small>
+        </div>
+      </div>
+
+      <nav id="nav" aria-label="Navigation principale">
+        <button type="button" data-vue="dash" aria-current="page">
+          <span class="ms" aria-hidden="true">space_dashboard</span>Tableau de bord
+        </button>
+        <button type="button" data-vue="prod">
+          <span class="ms" aria-hidden="true">smartphone</span>Vue producteur
+        </button>
+        <!-- Parcelles, Diagnostic IA et API REST : issues #16 et #22. -->
+      </nav>
+
+      <div class="user">
+        <i aria-hidden="true">A</i>
+        <div>
+          <b>Acheteur Ebolowa</b><br>
+          <span style="color:#d9b99a">Abonnement actif</span>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <header>
+        <h2 id="titre">Tableau de bord</h2>
+        <span class="sp"></span>
+        <span id="etat-source" class="etat" data-source="demo" role="status">Chargement…</span>
+        <button type="button" class="ib" id="actualiser" aria-label="Actualiser les indicateurs">
+          <span class="ms" aria-hidden="true">refresh</span>
+        </button>
+        <button type="button" class="ib" id="theme" aria-label="Changer de thème" aria-pressed="false">
+          <span class="ms" aria-hidden="true">contrast</span>
+        </button>
+      </header>
+
+      <section id="vue" class="vue" tabindex="-1" aria-label="Indicateurs">
+        <p class="sub">Chargement des indicateurs…</p>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

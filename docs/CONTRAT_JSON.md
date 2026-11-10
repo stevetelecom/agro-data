@@ -208,6 +208,7 @@ Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `
 ```
 
 - `reference_price` est le prix de référence, `adjusted_price` le prix ajusté selon l'indice (RM3).
+- Formule v1 : `adjusted_price = reference_price × (1 + 0,15 × indice / 100)`. Le coefficient `0,15` est défini dans `backend/app/services/pricing.py` et reste à calibrer avec les données ICCO/CICC.
 - `is_demo` reste à `true` tant que les coefficients ne sont pas calibrés : le dashboard **doit** afficher la mention « courbe de démonstration ».
 - `formula_version` est journalisé avec chaque calcul (RM5, audit).
 
