@@ -19,6 +19,8 @@ os.environ["JWT_SECRET"] = "test-jwt-secret-32bytes-minimum!!"
 os.environ["DEVICE_API_KEY"] = "test-device-key"
 os.environ["DEMO_ADMIN_EMAIL"] = "acheteur@agro-data.local"
 os.environ["DEMO_ADMIN_PASSWORD"] = "ChangeMe123!"
+os.environ["DEMO_BUYER_EMAIL"] = "lecteur@agro-data.local"
+os.environ["DEMO_BUYER_PASSWORD"] = "ChangeMe123!"
 os.environ["RATE_LIMIT_PER_MINUTE"] = "1000"
 
 from app.config import get_settings
@@ -31,8 +33,9 @@ get_settings.cache_clear()
 
 
 @pytest.fixture()
-def client():
-    """Client TestClient avec SQLite mémoire partagée."""
+def client(tmp_path, monkeypatch):
+    """Client TestClient avec SQLite mémoire partagée et Data Lake temporaire."""
+    monkeypatch.setenv("DATA_LAKE_DIR", str(tmp_path / "data_lake"))
     get_settings.cache_clear()
     reset_rate_limits()
 
@@ -92,9 +95,22 @@ def valid_measurement() -> dict:
 
 @pytest.fixture()
 def auth_headers(client: TestClient) -> dict[str, str]:
+    """JWT admin (compte démo historique)."""
     response = client.post(
         "/api/v1/auth/login",
         json={"email": "acheteur@agro-data.local", "password": "ChangeMe123!"},
+    )
+    assert response.status_code == 200, response.text
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture()
+def buyer_headers(client: TestClient) -> dict[str, str]:
+    """JWT acheteur (lecture seule CRUD)."""
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": "lecteur@agro-data.local", "password": "ChangeMe123!"},
     )
     assert response.status_code == 200, response.text
     token = response.json()["access_token"]

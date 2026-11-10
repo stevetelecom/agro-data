@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Measurement
 from app.schemas.measurement import MeasurementCreate
+from app.services.data_lake import log_rejection
 
 # Plages physiques raisonnables pour Ambam (air ambient).
 TEMP_MIN_C = -10.0
@@ -68,14 +69,14 @@ def ensure_not_duplicate(db: Session, payload: MeasurementCreate) -> None:
 def run_pipeline(db: Session, payload: MeasurementCreate, now: int | None = None) -> MeasurementCreate:
     """
     Exécute le pipeline complet avant persistance.
-    Lève HTTPException 422 en cas d'anomalie explicite.
+    Lève HTTPException 422 en cas d'anomalie explicite et journalise le motif.
     """
     try:
         validate_physical_ranges(payload)
         validate_timestamp(payload, now=now)
         ensure_not_duplicate(db, payload)
     except PipelineError as exc:
-        # 422 : contenu non traitable (compat FastAPI récent + ancien).
+        log_rejection(payload.device_id, payload.timestamp, str(exc))
         code = getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", status.HTTP_422_UNPROCESSABLE_ENTITY)
         raise HTTPException(status_code=code, detail=str(exc)) from exc
     return payload

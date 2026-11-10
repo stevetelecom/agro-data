@@ -1,9 +1,12 @@
 """
-Rôle : tests MOD-A1 / A2 — ingestion et pipeline.
+Rôle : tests MOD-A1 / A2 — ingestion, pipeline et Data Lake.
 Auteur : NKWANE Mourad.
 """
 
 import time
+from pathlib import Path
+
+from app.config import get_settings
 
 
 def test_post_measurement_accepts_valid_json(client, api_headers, valid_measurement):
@@ -14,6 +17,14 @@ def test_post_measurement_accepts_valid_json(client, api_headers, valid_measurem
     assert body["air_humidity_pct"] == 88.2
     assert body["geo_enc"] != "lat:2.383,lon:11.283"
     assert body["geo_enc"] != ""
+
+
+def test_post_measurement_stores_raw_in_data_lake(client, api_headers, valid_measurement):
+    response = client.post("/api/v1/measurements", json=valid_measurement, headers=api_headers)
+    assert response.status_code == 201
+    raw_dir = Path(get_settings().data_lake_dir) / "raw"
+    files = list(raw_dir.glob("*.json"))
+    assert len(files) >= 1
 
 
 def test_post_measurement_rejects_invalid_json(client, api_headers):
@@ -42,6 +53,9 @@ def test_pipeline_rejects_out_of_range_temperature(client, api_headers, valid_me
     response = client.post("/api/v1/measurements", json=valid_measurement, headers=api_headers)
     assert response.status_code == 422
     assert "temperature_c" in response.json()["detail"]
+    rejects = Path(get_settings().data_lake_dir) / "rejects.log"
+    assert rejects.exists()
+    assert "temperature_c" in rejects.read_text(encoding="utf-8")
 
 
 def test_pipeline_rejects_duplicate(client, api_headers, valid_measurement):
@@ -56,3 +70,14 @@ def test_pipeline_rejects_future_timestamp(client, api_headers, valid_measuremen
     valid_measurement["timestamp"] = int(time.time()) + 3600
     response = client.post("/api/v1/measurements", json=valid_measurement, headers=api_headers)
     assert response.status_code == 422
+
+
+def test_openapi_measurement_example_present(client):
+    response = client.get("/openapi.json")
+    assert response.status_code == 200
+    schemas = response.json()["components"]["schemas"]
+    assert "MeasurementCreate" in schemas
+    example = schemas["MeasurementCreate"].get("example") or schemas["MeasurementCreate"].get(
+        "examples"
+    )
+    assert example is not None

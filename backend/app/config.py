@@ -23,8 +23,11 @@ class Settings(BaseSettings):
     # Clé d'API appareil de démonstration (header X-API-Key).
     device_api_key: str = "agro-device-demo-key"
     rate_limit_per_minute: int = 120
+    data_lake_dir: str = "data_lake"
     demo_admin_email: str = "acheteur@agro-data.local"
     demo_admin_password: str = "ChangeMe123!"
+    demo_buyer_email: str = "lecteur@agro-data.local"
+    demo_buyer_password: str = "ChangeMe123!"
 
 
 @lru_cache

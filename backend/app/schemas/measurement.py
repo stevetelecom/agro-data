@@ -3,7 +3,23 @@ Rôle : schémas Pydantic du contrat JSON §12 (ingestion / lecture).
 Auteur : NKWANE Mourad (MOD-A1).
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+# Exemple officiel aligné sur le cahier des charges section 12.1.
+JSON_CONTRACT_EXAMPLE = {
+    "device_id": "AMB-P001",
+    "timestamp": 1731225600,
+    "climate": {
+        "temperature_c": 27.4,
+        "air_humidity_pct": 88.2,
+        "soil_humidity_pct": 61.0,
+    },
+    "diagnostic_ia": {
+        "phytophthora_detected": 0,
+        "confidence": 0.93,
+    },
+    "geo_enc": "lat:2.383,lon:11.283",
+}
 
 
 class ClimateData(BaseModel):
@@ -22,7 +38,9 @@ class DiagnosticIA(BaseModel):
 
 
 class MeasurementCreate(BaseModel):
-    """Payload d'ingestion conforme au cahier des charges §12."""
+    """Payload d'ingestion conforme au cahier des charges §12.1."""
+
+    model_config = ConfigDict(json_schema_extra={"example": JSON_CONTRACT_EXAMPLE})
 
     device_id: str = Field(..., min_length=1, max_length=64)
     timestamp: int = Field(..., gt=0)
@@ -44,4 +62,4 @@ class MeasurementRead(BaseModel):
     confidence: float
     geo_enc: str
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)

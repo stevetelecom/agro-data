@@ -1,6 +1,6 @@
 """
-Rôle : initialisation utilisateur démo (acheteur) si absent.
-Auteur : NKWANE Mourad (MOD-A3).
+Rôle : initialisation utilisateurs démo (admin + acheteur) si absents.
+Auteur : NKWANE Mourad (MOD-A3 / A6).
 """
 
 from sqlalchemy.orm import Session
@@ -10,17 +10,24 @@ from app.models import User
 from app.security.auth import hash_password
 
 
-def ensure_demo_user(db: Session) -> None:
-    """Crée l'utilisateur acheteur de démonstration si nécessaire."""
-    settings = get_settings()
-    existing = db.query(User).filter(User.email == settings.demo_admin_email).first()
+def _ensure_user(db: Session, email: str, password: str, role: str) -> None:
+    existing = db.query(User).filter(User.email == email).first()
     if existing is not None:
         return
-    user = User(
-        email=settings.demo_admin_email,
-        password_hash=hash_password(settings.demo_admin_password),
-        role="admin",
-        is_active=True,
+    db.add(
+        User(
+            email=email,
+            password_hash=hash_password(password),
+            role=role,
+            is_active=True,
+        )
     )
-    db.add(user)
     db.commit()
+
+
+def ensure_demo_user(db: Session) -> None:
+    """Crée l'admin et l'acheteur de démonstration si nécessaire."""
+    settings = get_settings()
+    # Compte historique (email acheteur@...) conservé en rôle admin pour la démo CRUD.
+    _ensure_user(db, settings.demo_admin_email, settings.demo_admin_password, "admin")
+    _ensure_user(db, settings.demo_buyer_email, settings.demo_buyer_password, "acheteur")

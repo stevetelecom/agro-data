@@ -9,18 +9,21 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Device, Plot, User
 from app.schemas.crud import DeviceCreate, DeviceRead, DeviceUpdate
-from app.security.auth import get_current_user
+from app.security.auth import require_roles
 from app.security.rate_limit import rate_limit_dependency
 
 router = APIRouter(
     prefix="/api/v1/devices",
     tags=["devices"],
-    dependencies=[Depends(rate_limit_dependency), Depends(get_current_user)],
+    dependencies=[Depends(rate_limit_dependency)],
 )
 
 
 @router.get("", response_model=list[DeviceRead])
-def list_devices(db: Session = Depends(get_db), _: User = Depends(get_current_user)) -> list[Device]:
+def list_devices(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin", "acheteur")),
+) -> list[Device]:
     return db.query(Device).order_by(Device.id).all()
 
 
@@ -28,7 +31,7 @@ def list_devices(db: Session = Depends(get_db), _: User = Depends(get_current_us
 def create_device(
     body: DeviceCreate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_roles("admin")),
 ) -> Device:
     if db.query(Device).filter(Device.device_id == body.device_id).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="device_id déjà utilisé")
@@ -50,7 +53,7 @@ def create_device(
 def get_device(
     device_pk: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_roles("admin", "acheteur")),
 ) -> Device:
     row = db.query(Device).filter(Device.id == device_pk).first()
     if row is None:
@@ -63,7 +66,7 @@ def update_device(
     device_pk: int,
     body: DeviceUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_roles("admin")),
 ) -> Device:
     row = db.query(Device).filter(Device.id == device_pk).first()
     if row is None:
@@ -83,7 +86,7 @@ def update_device(
 def delete_device(
     device_pk: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_roles("admin")),
 ) -> None:
     row = db.query(Device).filter(Device.id == device_pk).first()
     if row is None:

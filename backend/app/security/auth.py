@@ -72,3 +72,20 @@ def require_device_api_key(x_api_key: str | None = Header(default=None, alias="X
             detail="Clé d'API appareil invalide ou manquante",
         )
     return x_api_key
+
+
+def require_roles(*roles: str):
+    """
+    Dépendance FastAPI : n'autorise que les rôles listés
+    (ex. admin pour écriture CRUD, acheteur+admin pour lecture).
+    """
+
+    def _dependency(user: User = Depends(get_current_user)) -> User:
+        if user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Rôle insuffisant (requis: {', '.join(roles)})",
+            )
+        return user
+
+    return _dependency

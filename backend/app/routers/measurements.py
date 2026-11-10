@@ -9,12 +9,34 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Measurement, User
 from app.schemas.measurement import MeasurementCreate, MeasurementRead
-from app.security.auth import get_current_user, require_device_api_key
+from app.security.auth import require_device_api_key, require_roles
 from app.security.rate_limit import rate_limit_dependency
-from app.services.crypto import prepare_geo_enc
+from app.services.crypto import decrypt_geo, prepare_geo_enc
+from app.services.data_lake import store_raw_measurement
 from app.services.pipeline import run_pipeline
 
 router = APIRouter(prefix="/api/v1/measurements", tags=["measurements"])
+
+
+def _to_read(row: Measurement, *, decrypt: bool = False) -> MeasurementRead:
+    """Construit le schéma de lecture ; déchiffre geo_enc si lecture autorisée."""
+    geo = row.geo_enc
+    if decrypt and geo:
+        try:
+            geo = decrypt_geo(geo)
+        except Exception:
+            geo = row.geo_enc
+    return MeasurementRead(
+        id=row.id,
+        device_id=row.device_id,
+        timestamp=row.timestamp,
+        temperature_c=row.temperature_c,
+        air_humidity_pct=row.air_humidity_pct,
+        soil_humidity_pct=row.soil_humidity_pct,
+        phytophthora_detected=row.phytophthora_detected,
+        confidence=row.confidence,
+        geo_enc=geo,
+    )
 
 
 @router.post(
@@ -22,12 +44,15 @@ router = APIRouter(prefix="/api/v1/measurements", tags=["measurements"])
     response_model=MeasurementRead,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(rate_limit_dependency), Depends(require_device_api_key)],
+    summary="Ingérer une mesure (contrat JSON §12.1)",
 )
 def create_measurement(
     payload: MeasurementCreate,
     db: Session = Depends(get_db),
-) -> Measurement:
+) -> MeasurementRead:
     """Ingère une mesure JSON après validation Pydantic et pipeline."""
+    # Zone brute : dump JSON tel que reçu (après validation schéma).
+    store_raw_measurement(payload)
     run_pipeline(db, payload)
     geo_enc = prepare_geo_enc(payload.geo_enc)
     row = Measurement(
@@ -43,22 +68,24 @@ def create_measurement(
     db.add(row)
     db.commit()
     db.refresh(row)
-    return row
+    # Réponse création : geo_enc reste chiffré (preuve BNF3 en base / réponse appareil).
+    return _to_read(row, decrypt=False)
 
 
 @router.get(
     "",
     response_model=list[MeasurementRead],
     dependencies=[Depends(rate_limit_dependency)],
+    summary="Lister les mesures (JWT, geo_enc déchiffré)",
 )
 def list_measurements(
     device_id: str | None = Query(default=None),
     ts_from: int | None = Query(default=None, ge=0),
     ts_to: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
-) -> list[Measurement]:
-    """Liste filtrable des mesures (JWT requis)."""
+    _: User = Depends(require_roles("admin", "acheteur")),
+) -> list[MeasurementRead]:
+    """Liste filtrable des mesures ; geo_enc déchiffré pour lecture autorisée."""
     query = db.query(Measurement)
     if device_id:
         query = query.filter(Measurement.device_id == device_id)
@@ -66,4 +93,5 @@ def list_measurements(
         query = query.filter(Measurement.timestamp >= ts_from)
     if ts_to is not None:
         query = query.filter(Measurement.timestamp <= ts_to)
-    return query.order_by(Measurement.timestamp.desc()).limit(500).all()
+    rows = query.order_by(Measurement.timestamp.desc()).limit(500).all()
+    return [_to_read(row, decrypt=True) for row in rows]
