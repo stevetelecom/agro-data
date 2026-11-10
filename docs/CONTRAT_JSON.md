@@ -65,7 +65,7 @@ En production, le transport se fait en HTTPS (cahier des charges §13). La clé 
 
 | Champ | Type | Obligatoire | Contrainte | Description |
 |---|---|---|---|---|
-| `device_id` | chaîne | oui | 1 à 64 caractères | Identifiant de l'appareil. Il rattache implicitement la mesure à une parcelle. |
+| `device_id` | chaîne | oui | `^[A-Za-z0-9._-]{1,64}$` | Identifiant de l'appareil. Il rattache implicitement la mesure à une parcelle. |
 | `timestamp` | entier | oui | `> 0`, secondes Unix UTC | Seconde exacte de la mesure, pas de millisecondes. |
 | `climate` | objet | oui | voir 3.3 | Mesures climatiques de l'heure. |
 | `diagnostic_ia` | objet | oui | voir 3.3 | Résultat du diagnostic de pourriture brune. |
@@ -335,8 +335,8 @@ Ces points ne bloquent pas le développement, mais doivent être tranchés avant
 
 | Point | Décision proposée | Référence |
 |---|---|---|
-| Format de `device_id` | restreindre à `^[A-Za-z0-9._-]{1,64}$` (sécurité : évite un path traversal dans les noms de fichiers du Data Lake) | revue PR #25, point 1 |
-| `geo_enc` en clair dans la zone brute | exclure le champ du dump brut, ou chiffrer avant écriture | revue PR #25, point 2, BNF3 |
+| Format de `device_id` | ✅ restreint à `^[A-Za-z0-9._-]{1,64}$` (sécurité : évite un path traversal dans les noms de fichiers du Data Lake) | revue PR #25, point 1 |
+| `geo_enc` en clair dans la zone brute | ✅ chiffré AES-256-GCM avant écriture ; le nom de fichier est aussi nettoyé | revue PR #25, point 2, BNF3 |
 | `confidence` obligatoire ou non | garder obligatoire ; le simulateur fournit toujours une valeur | #6 |
 | Unité de `timestamp` | secondes Unix UTC confirmé ; le simulateur doit convertir depuis `datetime` | #6 |
 | Champs de `Plot` | ajouter `village` et `surface_ha` au modèle, à la place de `location_label` | #18, `docs/DESIGN_SYSTEM.md` §8 |

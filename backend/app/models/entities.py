@@ -5,7 +5,7 @@ Auteur : NKWANE Mourad (MOD-A1 / A6).
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -80,5 +80,5 @@ class Measurement(Base):
     soil_humidity_pct: Mapped[float] = mapped_column(Float, nullable=False)
     phytophthora_detected: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
-    geo_enc: Mapped[str] = mapped_column(String(1024), nullable=False, default="")
+    geo_enc: Mapped[str] = mapped_column(Text, nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

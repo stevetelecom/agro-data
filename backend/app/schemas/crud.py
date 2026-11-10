@@ -50,7 +50,7 @@ class DeviceCreate(BaseModel):
         }
     )
 
-    device_id: str = Field(..., min_length=1, max_length=64)
+    device_id: str = Field(..., min_length=1, max_length=64, pattern=r"^[A-Za-z0-9._-]+$")
     label: str = Field(default="", max_length=255)
     plot_id: int | None = None
     is_active: bool = True

@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     device_api_key: str = "agro-device-demo-key"
     rate_limit_per_minute: int = 120
     data_lake_dir: str = "data_lake"
+    # Origines autorisées pour le tableau de bord statique (dev local).
+    # `null` couvre l'ouverture directe des fichiers en `file://`.
+    cors_origins: str = (
+        "http://localhost:8000,http://127.0.0.1:8000,"
+        "http://localhost:5500,http://127.0.0.1:5500,"
+        "http://localhost:5173,http://127.0.0.1:5173,null"
+    )
     # Comptes de démonstration, alignés sur la maquette (docs/DESIGN_SYSTEM.md).
     # À supprimer ou à changer avant toute mise en ligne.
     demo_admin_email: str = "acheteur@ebolowa.cm"

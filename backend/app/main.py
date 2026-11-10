@@ -6,6 +6,7 @@ Auteur : NKWANE Mourad.
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import SessionLocal, init_db
@@ -36,6 +37,16 @@ def create_app() -> FastAPI:
             "(modules MOD-A1, A2, A3, A6 — NKWANE Mourad)."
         ),
         lifespan=lifespan,
+    )
+    origins = [
+        origine.strip() for origine in settings.cors_origins.split(",") if origine.strip()
+    ]
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     application.include_router(auth.router)
     application.include_router(measurements.router)

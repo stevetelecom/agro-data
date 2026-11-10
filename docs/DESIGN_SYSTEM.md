@@ -161,7 +161,7 @@ Les trois points d'accessibilité sont traités dans `dashboard/css/app.css` (is
 | Graphiques | SVG écrits à la main | — | remplacer par Chart.js (#16) |
 | Tableaux | `<table>` statique | — | remplacer par jQWidgets (#16) |
 | Température sur la vue producteur | `27 °C` en gros bouton | `climate.temperature_c` est ingéré, mais `/kpis` n'expose pas de moyenne de température | **décision #15** : afficher les **alertes actives** à la place, sans changer le contrat ; si le besoin est confirmé, ajouter `avg_air_temperature_c` à `/kpis` (évolution mineure, contrat §7) |
-| CORS | — | absent | activer `CORSMiddleware` (point 4 de la revue #25) |
+| CORS | — | absent (revue #25) | ✅ résolu : `CORSMiddleware` activé, origines locales (`localhost`/`127.0.0.1` ports 8000/5500/5173) et `null` pour l'ouverture en `file://` |
 
 ---
 
@@ -171,3 +171,4 @@ Les trois points d'accessibilité sont traités dans `dashboard/css/app.css` (is
 |---|---|---|---|
 | 1.0 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Extraction des jetons, composants et écrans depuis la maquette `agro-data-maquette.html` |
 | 1.1 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Écrans 2 et 5 implémentés (`dashboard/app.html`), accessibilité traitée, écart température documenté (#15) |
+| 1.2 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | CORS activé, `geo_enc` en `Text` et chiffré dans la zone brute, `device_id` contraint (revue #25) |

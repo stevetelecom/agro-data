@@ -42,7 +42,7 @@ class MeasurementCreate(BaseModel):
 
     model_config = ConfigDict(json_schema_extra={"example": JSON_CONTRACT_EXAMPLE})
 
-    device_id: str = Field(..., min_length=1, max_length=64)
+    device_id: str = Field(..., min_length=1, max_length=64, pattern=r"^[A-Za-z0-9._-]+$")
     timestamp: int = Field(..., gt=0)
     climate: ClimateData
     diagnostic_ia: DiagnosticIA
