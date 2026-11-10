@@ -97,6 +97,7 @@ des données simulées. Dans ce cas :
 | Compte-rendu de Sprint Review | `SPRINT_4_REVIEW.md` | SM |
 | Rétrospective finale | `RETROSPECTIVES.md` § Sprint 4 | SM |
 | Procès-verbal de recette | `docs/livrables/PV_RECETTE.md` | PO |
+| Preuves des 8 critères CDC §17 | `docs/livrables/CRITERES_ACCEPTATION.md` | SM (#20) |
 | Tag `v-final` | Git | SM (#20) |
 | Documentation OpenAPI | `GET /docs` | Mourad (#18) |
 
