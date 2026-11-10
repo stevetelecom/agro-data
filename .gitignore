@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Base de données locale
+*.db
+*.sqlite
+*.sqlite3
+
+# Données volumineuses (IA)
+ai/dataset/*
+!ai/dataset/.gitkeep
+ai/model/*
+!ai/model/.gitkeep
+
+# Système et éditeurs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
