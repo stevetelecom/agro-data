@@ -133,7 +133,7 @@ dépôt, à confirmer en séance.
 
 | Réf. | Action | Porteur | Échéance |
 |---|---|---|---|
-| R4-1 | Créer le tag `v-final` après la revue, avec un message listant explicitement ce qui est livré et ce qui ne l'est pas | SM | 11/11 |
+| R4-1 | Créer le tag `v-final` avec un message listant explicitement ce qui est livré et ce qui ne l'est pas | SM | ✅ fait le 10/11 |
 | R4-2 | Livrer #6, #12, #8 et #22 en PR séparées, avec un test par issue, avant toute nouvelle démonstration | Mounpain, Patrick | prochaine itération |
 | R4-3 | Ne plus jamais cocher une case sans preuve exécutable (test, route, capture) | tous | immédiat |
 | R4-4 | Obtenir la validation du PO sur le contrat, le design system et les critères §17, ou consigner formellement son absence en Review | PO + SM | 11/11 |
@@ -154,7 +154,7 @@ dépôt, à confirmer en séance.
 | R3-3 une PR = un module | S3 | ❌ non appliqué — travail direct sur `main` assumé par le SM |
 | R3-4 démo de secours | S3 | ✅ maquette prête (`maquettes/agro-data-maquette.html`) |
 | R3-5 suppléant par module | S3 | ❌ non appliqué (blocs B et C sans code) |
-| R4-1 tag `v-final` après la revue | S4 | ⏳ en attente de la revue |
+| R4-1 tag `v-final` annoté et partiel | S4 | ✅ fait le 10/11 (reste à pousser sur `origin`) |
 | R4-2 livrer #6, #12, #8, #22 en PR | S4 | ⏳ prochaine itération |
 | R4-3 aucune case cochée sans preuve | S4 | ✅ appliqué le 10/11 (issue #20 corrigée) |
 | R4-4 validation PO ou absence consignée | S4 | ⏳ 11/11 |

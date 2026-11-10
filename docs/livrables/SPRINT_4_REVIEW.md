@@ -5,7 +5,7 @@
 | **Sprint** | Sprint 4 — Restitution et intégration |
 | **Échéance prévue** | 11/11/2026 (cahier des charges §16) |
 | **Revue prévue le** | 11/11/2026 |
-| **Tag** | `v-final` — **non créé** (voir §10) |
+| **Tag** | `v-final` — annoté, partiel (voir §10) |
 | **Participants** | MEKONTSO Olivier Steve (SM) |
 | **PO** | MESSANGA MESSANGA Mike — **validations en attente au 10/11** |
 | **Rédigé le** | 10/11/2026, à partir de l'état de `main` (commit `fe5f8a7`, CI verte) |
@@ -161,6 +161,16 @@ livrées, ou remplacées par le plan de secours (§5 de
 
 ## 10. Tag `v-final`
 
-Non créé. Les tags existants sont `v2` et `v3`, tous deux partiels. `v-final`
-sera créé après la revue du 11/11, sur le commit effectivement démontré, avec
-un message qui liste explicitement ce qui est livré et ce qui ne l'est pas.
+Créé le 10/11 sur l'état destiné à la démonstration du 11/11, en tag **annoté**.
+Son message liste explicitement le livré et le non-livré, sans quoi il laisserait
+croire à un incrément complet.
+
+- `v2` et `v3` : incréments des Sprints 2 et 3, tous deux partiels.
+- `v-final` : état démontré du Sprint 4 — backend complet et 79 tests verts,
+  mais sans simulateur, sans store-and-forward, sans dashboard CRUD, sans prix
+  v2 et sans IA entraînée.
+- Le tag est **en local uniquement** tant que le `push` n'est pas fait
+  (`git push origin v-final`).
+
+Si le PO valide des critères supplémentaires pendant la séance du 11/11, le tag
+reste valable : il décrit l'état du code, pas le statut de la recette.
