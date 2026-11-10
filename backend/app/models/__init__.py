@@ -1,4 +1,5 @@
-"""Modèles SQLAlchemy d'AGRO-DATA.
+"""Modèles SQLAlchemy AGRO-DATA."""
 
-Tables prévues : mesures, parcelles, appareils, abonnés, utilisateurs.
-"""
+from app.models.entities import Device, Measurement, Plot, Subscriber, User
+
+__all__ = ["User", "Plot", "Device", "Subscriber", "Measurement"]

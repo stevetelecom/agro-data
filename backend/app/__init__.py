@@ -1,1 +1,1 @@
-"""Application backend AGRO-DATA (Bloc A)."""
+"""Package applicatif AGRO-DATA (Bloc A - Mourad)."""

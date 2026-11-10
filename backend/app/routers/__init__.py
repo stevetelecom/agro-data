@@ -1,1 +1,1 @@
-"""Routeurs FastAPI : auth, measurements, plots, devices, subscribers, kpis, diagnostic."""
+"""Routeurs FastAPI AGRO-DATA (Mourad)."""
