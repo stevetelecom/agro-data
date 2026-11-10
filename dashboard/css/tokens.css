@@ -1,0 +1,99 @@
+/* AGRO-DATA — jetons du design system.
+ * Source : maquettes/agro-data-maquette.html (commit 10e7d3b)
+ * Documentation : docs/DESIGN_SYSTEM.md
+ * Auteur : MEKONTSO Olivier Steve (MOD-B1).
+ */
+
+:root {
+  /* Palette cacao */
+  --brun: #8b4a2b;
+  --brun-f: #3e2219;
+  --brun-m: #5a3020;
+  --or: #c8873a;
+  --creme: #f0ddc0;
+  --fond: #f7f1e8;
+  --carte: #ffffff;
+  --encre: #2b1a12;
+  --gris: #7a5c48;
+  --bord: #e2d6cc;
+
+  /* Sémantique des niveaux (RM2) : ne pas modifier sans mettre à jour le CDC */
+  --ok: #4f7f3a;
+  --mod: #c8873a;
+  --ko: #a63d2f;
+
+  /* Formes */
+  --r-carte: 16px;
+  --r-champ: 12px;
+  --r-boite: 20px;
+  --r-modale: 18px;
+  --r-pastille: 99px;
+  --ombre: 0 10px 28px rgba(62, 34, 25, 0.1);
+  --ombre-boite: 0 24px 60px rgba(0, 0, 0, 0.4);
+
+  /* Typographie */
+  --police: "Poppins", system-ui, sans-serif;
+  --police-icones: "Material Symbols Rounded";
+  --texte: 14px;
+  --titre-ecran: 17px;
+  --titre-carte: 14px;
+  --libelle: 12px;
+  --valeur-kpi: 25px;
+  --libelle-tableau: 11px;
+
+  /* Mise en page */
+  --largeur-barre-laterale: 236px;
+  --largeur-contenu: 1200px;
+  --gap: 16px;
+  --rupture: 820px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fond: #1e120d;
+    --carte: #2b1a12;
+    --encre: #f5e9da;
+    --gris: #c9ae98;
+    --bord: #4a2e22;
+    --creme: #3a2419;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --fond: #1e120d;
+  --carte: #2b1a12;
+  --encre: #f5e9da;
+  --gris: #c9ae98;
+  --bord: #4a2e22;
+  --creme: #3a2419;
+  color-scheme: dark;
+}
+
+/* Icône Material Symbols : <span class="ms">water_drop</span> */
+.ms {
+  font-family: var(--police-icones);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 22px;
+  line-height: 1;
+  vertical-align: middle;
+  display: inline-block;
+  font-feature-settings: "liga";
+}
+
+/* Pastille de niveau : toujours accompagnée du libellé, jamais la couleur seule */
+.pill {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: var(--r-pastille);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.pill.ok { background: var(--ok); }
+.pill.mod { background: var(--mod); }
+.pill.ko { background: var(--ko); }
