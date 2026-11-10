@@ -8,7 +8,7 @@
 | **Tag** | `v-final` — annoté, partiel (voir §10) |
 | **Participants** | MEKONTSO Olivier Steve (SM) |
 | **PO** | MESSANGA MESSANGA Mike — **validations en attente au 10/11** |
-| **Rédigé le** | 10/11/2026, à partir de l'état de `main` (commit `fe5f8a7`, CI verte) |
+| **Rédigé le** | 10/11/2026, à partir de l'état de `main` (CI verte, 79 tests) |
 
 > **Note de méthode.** Ce compte-rendu est rédigé la veille de la revue, à
 > partir de l'état réel du dépôt et du Kanban, et non des intentions du Sprint
