@@ -114,16 +114,17 @@ Grille : `gap: 16px` ; KPI `repeat(auto-fit, minmax(210px, 1fr))` ; graphiques `
 
 Navigation : 5 entrées maximum, dont 4 visibles en permanence (CDC ENF-U9). L'entrée active porte une barre `--or` à gauche.
 
-**État d'implémentation** : les écrans 2 et 5 sont codés dans `dashboard/app.html` (issue #15), avec `dashboard/css/app.css` et `dashboard/js/kpis.js`. Les écrans 1, 3, 4 et 6 restent à intégrer (#8, #14, #16, #22). La page tente `GET /api/v1/kpis` puis bascule sur un jeu de démonstration conforme au contrat si l'API n'est pas joignable : elle est démontrable sans backend.
+**État d'implémentation** : les écrans 2 et 5 sont codés dans `dashboard/app.html` (issues #15 et #21), avec `dashboard/css/app.css` et `dashboard/js/kpis.js`. L'écran 2 consomme `GET /api/v1/kpis` et `GET /api/v1/prices/forecast` ; chaque appel bascule indépendamment sur un jeu de démonstration conforme au contrat si l'API n'est pas joignable. La courbe de prix est rendue en SVG natif (pas de dépendance externe) avec mention « Courbe de démonstration » tant que `is_demo` vaut `true`. Les écrans 1, 3, 4 et 6 restent à intégrer (#8, #14, #16, #22).
 
 ---
 
 ## 6. Responsive
 
-Point de rupture unique : **820 px**.
+Point de rupture principal : **820 px** ; ajustement téléphone à **520 px**.
 
 - `> 820 px` : barre latérale fixe de 236 px, contenu décalé (`margin-left`), en-tête collant.
 - `<= 820 px` : la barre latérale devient une barre horizontale défilante en haut, le logo texte et le bloc utilisateur sont masqués, la marge gauche du contenu passe à 0, les tableaux défilent horizontalement.
+- `<= 520 px` : grilles KPI et graphiques sur une colonne, en-tête autorisé à passer à la ligne, feu producteur réduit à 160 px.
 
 Les zones tactiles respectent `env(safe-area-inset-*)` en haut et en bas (encoches).
 
@@ -172,3 +173,4 @@ Les trois points d'accessibilité sont traités dans `dashboard/css/app.css` (is
 | 1.0 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Extraction des jetons, composants et écrans depuis la maquette `agro-data-maquette.html` |
 | 1.1 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Écrans 2 et 5 implémentés (`dashboard/app.html`), accessibilité traitée, écart température documenté (#15) |
 | 1.2 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | CORS activé, `geo_enc` en `Text` et chiffré dans la zone brute, `device_id` contraint (revue #25) |
+| 1.3 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Courbe de prix SVG branchée sur `/prices/forecast`, responsive 520 px, mention démonstration (#15, #21) |

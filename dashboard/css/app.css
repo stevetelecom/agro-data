@@ -242,11 +242,11 @@ header h2 {
 }
 
 .g4 {
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
 }
 
 .g2 {
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
   margin-top: var(--gap);
 }
 
@@ -256,6 +256,7 @@ header h2 {
   border-radius: var(--r-carte);
   background: var(--carte);
   box-shadow: var(--ombre);
+  overflow-wrap: anywhere;
 }
 
 .card h3 {
@@ -321,6 +322,10 @@ header h2 {
 /* ===== Graphique SVG ===== */
 .graphique {
   margin: 0;
+}
+
+.graphique-prix {
+  margin-top: var(--gap);
 }
 
 .graphique svg {
@@ -541,6 +546,39 @@ td {
 
   header {
     padding: 12px 16px;
+  }
+}
+
+/* ===== Très petits écrans (téléphone producteur) ===== */
+@media (max-width: 520px) {
+  header {
+    flex-wrap: wrap;
+  }
+
+  header h2 {
+    font-size: 20px;
+  }
+
+  .etat {
+    order: 3;
+  }
+
+  .g4,
+  .g2 {
+    grid-template-columns: 1fr;
+  }
+
+  .gros {
+    gap: 10px;
+  }
+
+  .feu {
+    width: 160px;
+    height: 160px;
+  }
+
+  .feu .ms {
+    font-size: 80px;
   }
 }
 

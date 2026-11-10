@@ -82,6 +82,20 @@ const KPIS_DEMO = {
   ],
 };
 
+// Courbe de prix de démonstration (contrat §4.5, formule RM3 v1).
+const INDICES_DEMO = [0, 8, 14, 28, 42, 55, 62];
+const PRIX_DEMO = {
+  unit: "FCFA/kg",
+  horizon_days: JOURS_DEMO.length,
+  is_demo: true,
+  formula_version: "v1",
+  points: JOURS_DEMO.map((date, i) => ({
+    date,
+    reference_price: 1050,
+    adjusted_price: Math.round(1050 * (1 + 0.15 * INDICES_DEMO[i] / 100) * 100) / 100,
+  })),
+};
+
 /* ===== Accès aux données ===== */
 
 /**
@@ -106,6 +120,33 @@ async function chargerKpis() {
   } catch (erreur) {
     console.warn("KPIs indisponibles, repli sur les données de démonstration :", erreur.message);
     return { donnees: KPIS_DEMO, source: "demo", motif: erreur.message };
+  } finally {
+    clearTimeout(minuteur);
+  }
+}
+
+/**
+ * Charge la courbe de prix : API réelle si un jeton existe, sinon démonstration.
+ * @returns {Promise<{donnees: object, source: "api"|"demo", motif: string}>}
+ */
+async function chargerPrix() {
+  const jeton = localStorage.getItem(TOKEN_KEY);
+  if (!jeton) {
+    return { donnees: PRIX_DEMO, source: "demo", motif: "aucun jeton de session" };
+  }
+
+  const controleur = new AbortController();
+  const minuteur = setTimeout(() => controleur.abort(), DELAI_API_MS);
+  try {
+    const reponse = await fetch(`${API_BASE}/api/v1/prices/forecast?days=${FENETRE_JOURS}`, {
+      headers: { Authorization: `Bearer ${jeton}` },
+      signal: controleur.signal,
+    });
+    if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
+    return { donnees: await reponse.json(), source: "api", motif: "" };
+  } catch (erreur) {
+    console.warn("Courbe de prix indisponible, repli sur la démonstration :", erreur.message);
+    return { donnees: PRIX_DEMO, source: "demo", motif: erreur.message };
   } finally {
     clearTimeout(minuteur);
   }
@@ -183,9 +224,68 @@ function tableauHumidite(series) {
   </details>`;
 }
 
+/** Tableau alternatif de la courbe de prix, pour les lecteurs d'écran. */
+function tableauPrix(prix) {
+  const points = prix.points ?? [];
+  if (points.length === 0) return "";
+  const lignes = points
+    .map(
+      (point) =>
+        `<tr><td>${esc(jourCourt(point.date))}</td><td>${nombre(point.reference_price, 0)}</td><td>${nombre(point.adjusted_price, 0)}</td></tr>`,
+    )
+    .join("");
+  return `<details class="donnees"><summary>Voir les données de la courbe</summary>
+    <div class="scroll"><table>
+      <thead><tr><th>Jour</th><th>Prix de référence</th><th>Prix ajusté</th></tr></thead>
+      <tbody>${lignes}</tbody>
+    </table></div>
+  </details>`;
+}
+
+/** Courbe de prix prédictive (contrat §4.5) en SVG accessible. */
+function graphiquePrix(prix) {
+  const points = prix.points ?? [];
+  if (points.length === 0) {
+    return '<p class="sub">Aucune donnée de prix sur la fenêtre demandée.</p>';
+  }
+
+  const largeur = 520;
+  const hauteur = 210;
+  const gauche = 54;
+  const droite = 14;
+  const haut = 12;
+  const bas = 26;
+  const valeurs = points.flatMap((p) => [Number(p.reference_price), Number(p.adjusted_price)]);
+  const min = Math.floor(Math.min(...valeurs) / 50) * 50 - 25;
+  const max = Math.ceil(Math.max(...valeurs) / 50) * 50 + 25;
+  const pasX = points.length > 1 ? (largeur - gauche - droite) / (points.length - 1) : 0;
+  const x = (i) => gauche + i * pasX;
+  const y = (v) => hauteur - bas - ((v - min) / (max - min)) * (hauteur - haut - bas);
+  const trace = (cle) => points.map((p, i) => `${x(i)},${y(Number(p[cle]))}`).join(" ");
+
+  let svg = `<svg viewBox="0 0 ${largeur} ${hauteur}" role="img" aria-label="Prix du cacao sur ${points.length} jours, de ${nombre(min, 0)} à ${nombre(max, 0)} francs CFA par kilogramme.">`;
+
+  for (let i = 0; i <= 4; i += 1) {
+    const valeur = min + (i * (max - min)) / 4;
+    svg += `<line x1="${gauche}" x2="${largeur - droite}" y1="${y(valeur)}" y2="${y(valeur)}" stroke="var(--bord)"/>`;
+    svg += `<text x="4" y="${y(valeur) + 3}">${nombre(valeur, 0)}</text>`;
+  }
+
+  svg += `<polyline fill="none" stroke="var(--gris)" stroke-width="2" stroke-dasharray="5 4" points="${trace("reference_price")}"/>`;
+  svg += `<polyline fill="none" stroke="var(--brun)" stroke-width="2.8" stroke-linejoin="round" points="${trace("adjusted_price")}"/>`;
+
+  points.forEach((point, i) => {
+    if (points.length > 8 && i % 2 === 1) return;
+    svg += `<text x="${x(i) - 12}" y="${hauteur - 8}">${jourCourt(point.date)}</text>`;
+  });
+
+  svg += "</svg>";
+  return svg;
+}
+
 /* ===== Vues ===== */
 
-function vueTableauDeBord(donnees) {
+function vueTableauDeBord(donnees, prix) {
   const niveauGlobal = niveau(donnees.level);
   const delta = Number(donnees.humidity_delta_7d) || 0;
   const signe = delta > 0 ? "+" : "";
@@ -263,7 +363,20 @@ function vueTableauDeBord(donnees) {
     </section>
   </div>
 
-  <p class="sub" style="margin-top:14px">La courbe de prix prédictive et le tableau des parcelles arrivent avec l'intégration Chart.js et jQWidgets (#16).</p>`;
+  <figure class="card graphique graphique-prix">
+    <h3>Courbe de prix prédictive</h3>
+    <div class="sub">
+      Prix de référence (pointillé) et prix ajusté par l'indice d'infestation (RM3), ${nombre(prix.horizon_days, 0)} jours, en ${esc(prix.unit ?? "FCFA/kg")}
+      ${prix.is_demo ? '<span class="pill mod">Courbe de démonstration</span>' : ""}
+    </div>
+    ${graphiquePrix(prix)}
+    <div class="legende">
+      <span><i style="background:var(--gris)"></i>Prix de référence</span>
+      <span><i style="background:var(--brun)"></i>Prix ajusté (RM3)</span>
+      <span>Formule ${esc(prix.formula_version ?? "v1")}</span>
+    </div>
+    ${tableauPrix(prix)}
+  </figure>`;
 }
 
 function vueProducteur(donnees) {
@@ -348,6 +461,7 @@ function basculerTheme() {
 }
 
 let kpisCourants = KPIS_DEMO;
+let prixCourants = PRIX_DEMO;
 
 function afficherVue(vue) {
   document.querySelectorAll("#nav button").forEach((bouton) => {
@@ -360,7 +474,7 @@ function afficherVue(vue) {
   $("#titre").textContent = TITRES[vue] ?? TITRES.dash;
 
   const zone = $("#vue");
-  zone.innerHTML = vue === "prod" ? vueProducteur(kpisCourants) : vueTableauDeBord(kpisCourants);
+  zone.innerHTML = vue === "prod" ? vueProducteur(kpisCourants) : vueTableauDeBord(kpisCourants, prixCourants);
   zone.focus({ preventScroll: true });
 }
 
@@ -392,8 +506,9 @@ function cablerActions() {
 }
 
 async function demarrer() {
-  const { donnees, source, motif } = await chargerKpis();
+  const [{ donnees, source, motif }, prix] = await Promise.all([chargerKpis(), chargerPrix()]);
   kpisCourants = donnees;
+  prixCourants = prix.donnees;
   afficherSource(source, motif);
   const vue = document.querySelector("#nav button[aria-current='page']")?.dataset.vue ?? "dash";
   afficherVue(vue);
