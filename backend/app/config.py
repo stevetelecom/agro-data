@@ -1,0 +1,33 @@
+"""
+Rôle : configuration centralisée (variables d'environnement).
+Auteur : NKWANE Mourad (MOD-A1 / A3).
+"""
+
+from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """Paramètres runtime du backend AGRO-DATA."""
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    app_name: str = "AGRO-DATA API"
+    database_url: str = "sqlite:///./agro_data.db"
+    # Clé AES-256 (32 octets) encodée en base64 — à surcharger via AGRO_AES_KEY.
+    agro_aes_key: str = "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+    jwt_secret: str = "change-me-agro-data-jwt-secret"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 60
+    # Clé d'API appareil de démonstration (header X-API-Key).
+    device_api_key: str = "agro-device-demo-key"
+    rate_limit_per_minute: int = 120
+    demo_admin_email: str = "acheteur@agro-data.local"
+    demo_admin_password: str = "ChangeMe123!"
+
+
+@lru_cache
+def get_settings() -> Settings:
+    """Retourne l'instance mise en cache des paramètres."""
+    return Settings()
