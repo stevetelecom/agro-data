@@ -152,7 +152,7 @@ Les trois ⚠️ sont à traiter lors du passage en code (#16).
 
 | Écart | Maquette | Backend (PR #25) | Décision proposée |
 |---|---|---|---|
-| Identifiants de démo | `acheteur@ebolowa.cm` / `demo1234` | `acheteur@agro-data.local` / `ChangeMe123!` | aligner le `.env.example` et le seed sur les valeurs de la maquette pour la démo |
+| Identifiants de démo | `acheteur@ebolowa.cm` / `demo1234` | alignés (commit `d524467`) | ✅ résolu : `acheteur@ebolowa.cm` (admin) et `lecteur@ebolowa.cm` (acheteur), mot de passe `demo1234` |
 | Champs de parcelle | `nom`, `village`, `ha` | `code`, `name`, `location_label` | ajouter `village` et `surface_ha` au modèle `Plot` (#18) |
 | Heures > 85 % | saisies dans le formulaire | non stockées | calculées à partir des mesures, en lecture seule (#13) |
 | Taux de détection IA | saisi dans le formulaire | non stocké | calculé à partir des mesures, en lecture seule (#13) |

@@ -1,6 +1,6 @@
 # Contrat d'échange JSON — AGRO-DATA
 
-**Version** : 1.1
+**Version** : 1.2
 **Date** : 10 novembre 2026
 **Statut** : figée par le Scrum Master, **en attente de confirmation du Product Owner**
 **Référence** : cahier des charges §12.1, §12.2, §17.1 et §17.6
@@ -262,6 +262,17 @@ Le formulaire de la maquette laisse saisir `hours_above_85` et `ia_detection_rat
 - `is_demo` : `true` tant que le modèle n'est pas entraîné sur un jeu d'images validé.
 - Une image illisible ou d'un autre type que JPEG/PNG → `422`.
 
+### 4.8 Comptes de démonstration
+
+Alignés sur l'écran de connexion de la maquette (commit `d524467`), créés au démarrage par `backend/app/seed.py` :
+
+| Rôle | E-mail | Mot de passe | Usage |
+|---|---|---|---|
+| `admin` | `acheteur@ebolowa.cm` | `demo1234` | CRUD complet, écrans 2 à 6 |
+| `acheteur` | `lecteur@ebolowa.cm` | `demo1234` | lecture seule |
+
+`POST /api/v1/auth/login` accepte `{ "email": ..., "password": ... }` et renvoie `{ "access_token": ..., "token_type": "bearer" }`. Ces comptes sont réservés à la démonstration et doivent être supprimés ou changés avant toute mise en ligne.
+
 ---
 
 ## 5. Exemples rejetés
@@ -320,7 +331,6 @@ Ces points ne bloquent pas le développement, mais doivent être tranchés avant
 | `geo_enc` en clair dans la zone brute | exclure le champ du dump brut, ou chiffrer avant écriture | revue PR #25, point 2, BNF3 |
 | `confidence` obligatoire ou non | garder obligatoire ; le simulateur fournit toujours une valeur | #6 |
 | Unité de `timestamp` | secondes Unix UTC confirmé ; le simulateur doit convertir depuis `datetime` | #6 |
-| Identifiants de démo | aligner le seed backend sur la maquette (`acheteur@ebolowa.cm` / `demo1234`) pour que la démo fonctionne sans retouche | #8, #16, `docs/DESIGN_SYSTEM.md` §8 |
 | Champs de `Plot` | ajouter `village` et `surface_ha` au modèle, à la place de `location_label` | #18, `docs/DESIGN_SYSTEM.md` §8 |
 | `humidity_series` dans `/kpis` | série agrégée par jour et par parcelle, plutôt qu'un appel `/measurements` par graphique | #13, #16 |
 | Formule du volume sain | `max(20, 100 − 0,7 × indice)` est une hypothèse de démonstration, à calibrer | #13 |
@@ -333,3 +343,4 @@ Ces points ne bloquent pas le développement, mais doivent être tranchés avant
 |---|---|---|---|
 | 1.0 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Première version figée à partir du CDC §12.1 et du schéma Pydantic de la PR #25 |
 | 1.1 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Ajout des modèles de lecture du dashboard (§4.4 à §4.7) alignés sur la maquette `agro-data-maquette.html` |
+| 1.2 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Comptes de démonstration alignés sur l'écran de connexion (§4.8, commit `d524467`) |
