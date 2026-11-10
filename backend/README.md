@@ -32,6 +32,15 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - Appareil (ingestion) : header `X-API-Key` (valeur `DEVICE_API_KEY` du `.env`)
 - Acheteur : `POST /api/v1/auth/login` avec l'utilisateur démo du `.env`, puis `Authorization: Bearer <token>`
 
+Comptes de démonstration, alignés sur la maquette (`docs/DESIGN_SYSTEM.md`) :
+
+| Rôle | E-mail | Mot de passe |
+|---|---|---|
+| `admin` | `acheteur@ebolowa.cm` | `demo1234` |
+| `acheteur` | `lecteur@ebolowa.cm` | `demo1234` |
+
+Ces comptes sont créés au démarrage par `app/seed.py`. Ils sont réservés à la démonstration et doivent être supprimés ou changés avant toute mise en ligne.
+
 ## Tests
 
 ```bash

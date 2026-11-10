@@ -24,10 +24,12 @@ class Settings(BaseSettings):
     device_api_key: str = "agro-device-demo-key"
     rate_limit_per_minute: int = 120
     data_lake_dir: str = "data_lake"
-    demo_admin_email: str = "acheteur@agro-data.local"
-    demo_admin_password: str = "ChangeMe123!"
-    demo_buyer_email: str = "lecteur@agro-data.local"
-    demo_buyer_password: str = "ChangeMe123!"
+    # Comptes de démonstration, alignés sur la maquette (docs/DESIGN_SYSTEM.md).
+    # À supprimer ou à changer avant toute mise en ligne.
+    demo_admin_email: str = "acheteur@ebolowa.cm"
+    demo_admin_password: str = "demo1234"
+    demo_buyer_email: str = "lecteur@ebolowa.cm"
+    demo_buyer_password: str = "demo1234"
 
 
 @lru_cache

@@ -17,10 +17,10 @@ os.environ["DATABASE_URL"] = "sqlite://"
 os.environ["AGRO_AES_KEY"] = "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
 os.environ["JWT_SECRET"] = "test-jwt-secret-32bytes-minimum!!"
 os.environ["DEVICE_API_KEY"] = "test-device-key"
-os.environ["DEMO_ADMIN_EMAIL"] = "acheteur@agro-data.local"
-os.environ["DEMO_ADMIN_PASSWORD"] = "ChangeMe123!"
-os.environ["DEMO_BUYER_EMAIL"] = "lecteur@agro-data.local"
-os.environ["DEMO_BUYER_PASSWORD"] = "ChangeMe123!"
+os.environ["DEMO_ADMIN_EMAIL"] = "acheteur@ebolowa.cm"
+os.environ["DEMO_ADMIN_PASSWORD"] = "demo1234"
+os.environ["DEMO_BUYER_EMAIL"] = "lecteur@ebolowa.cm"
+os.environ["DEMO_BUYER_PASSWORD"] = "demo1234"
 os.environ["RATE_LIMIT_PER_MINUTE"] = "1000"
 
 from app.config import get_settings
@@ -98,7 +98,7 @@ def auth_headers(client: TestClient) -> dict[str, str]:
     """JWT admin (compte démo historique)."""
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": "acheteur@agro-data.local", "password": "ChangeMe123!"},
+        json={"email": "acheteur@ebolowa.cm", "password": "demo1234"},
     )
     assert response.status_code == 200, response.text
     token = response.json()["access_token"]
@@ -110,7 +110,7 @@ def buyer_headers(client: TestClient) -> dict[str, str]:
     """JWT acheteur (lecture seule CRUD)."""
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": "lecteur@agro-data.local", "password": "ChangeMe123!"},
+        json={"email": "lecteur@ebolowa.cm", "password": "demo1234"},
     )
     assert response.status_code == 200, response.text
     token = response.json()["access_token"]

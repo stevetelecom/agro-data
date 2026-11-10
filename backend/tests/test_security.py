@@ -9,7 +9,7 @@ from app.services.crypto import decrypt_geo
 def test_login_success(client):
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": "acheteur@agro-data.local", "password": "ChangeMe123!"},
+        json={"email": "acheteur@ebolowa.cm", "password": "demo1234"},
     )
     assert response.status_code == 200
     body = response.json()
@@ -20,7 +20,7 @@ def test_login_success(client):
 def test_login_failure(client):
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": "acheteur@agro-data.local", "password": "WrongPass999"},
+        json={"email": "acheteur@ebolowa.cm", "password": "WrongPass999"},
     )
     assert response.status_code == 401
 

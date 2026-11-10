@@ -93,7 +93,7 @@ def test_rate_limit_returns_429(client, monkeypatch):
     codes = [
         client.post(
             "/api/v1/auth/login",
-            json={"email": "acheteur@agro-data.local", "password": "ChangeMe123!"},
+            json={"email": "acheteur@ebolowa.cm", "password": "demo1234"},
         ).status_code
         for _ in range(4)
     ]
