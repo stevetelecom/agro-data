@@ -16,13 +16,14 @@ leur reste-à-faire est explicite : aucune promesse au-delà de ce qui tourne.
 
 | # | Critère | Statut | Preuve principale |
 |---|---|---|---|
-| 1 | Un message JSON conforme arrive dans le Data Lake | ✅ | `test_e2e.py::test_scenario_complet_de_demonstration` || 2 | Une coupure réseau ne perd aucune mesure | ❌ | dépend de #12 (Store-and-Forward), non implémenté |
+| 1 | Un message JSON conforme arrive dans le Data Lake | ✅ | `test_e2e.py::test_scenario_complet_de_demonstration` |
+| 2 | Une coupure réseau ne perd aucune mesure | ❌ | dépend de #12 (Store-and-Forward), non implémenté |
 | 3 | Plus de 48 h > 85 % déclenche une alerte | ✅ | `test_kpis.py` (alerte à 48 h, pas avant 47 h) |
 | 4 | Le prototype IA retourne un drapeau et un score | 🟡 | `test_diagnostic.py`, `ai/infer.py` (stub, `is_demo: true`) |
 | 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | 🟡 | `dashboard/app.html`, `test_kpis.py` ; tableau CRUD (#16/#22) à venir |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py` |
-| 7 | Chaque action de gestion affiche un toast | ❌ | composant `toast.js` prêt, actions CRUD (#22) non branchées |
-| 8 | L'historique Git montre le travail de chaque membre | ✅ | 24 issues, commits signés par module, PR #25 |
+| 7 | Chaque action de gestion affiche un toast | ❌ | `toast.js` = squelette (3 lignes) ; actions CRUD (#22) non branchées |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 24 issues et 1 PR (#25) ; 33 des 35 commits sont du SM, travail direct sur `main` |
 
 Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · ❌ non couvert.
 
@@ -99,22 +100,27 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
 
 ### 7. Chaque action de gestion affiche un toast — ❌
 
-- Le composant `dashboard/js/toast.js` existe (3,2 s, icône `check_circle`),
-  mais les actions de gestion (créer/modifier/supprimer une parcelle, un
-  appareil, un abonné) ne sont pas encore branchées : elles dépendent de #22 et
-  des pages CRUD de #16/#18.
+- Le fichier `dashboard/js/toast.js` n'est qu'un squelette (3 lignes de TODO) :
+  aucun toast n'est implémenté dans l'application. Les actions de gestion
+  (créer/modifier/supprimer une parcelle, un appareil, un abonné) dépendent de
+  #22 et des pages CRUD de #16/#18.
 - Décision : ne pas cocher. Le toast est visible dans la maquette et le design
   system, pas dans l'application.
 
-### 8. L'historique Git montre le travail de chaque membre — ✅
+### 8. L'historique Git montre le travail de chaque membre — 🟡
 
 - 24 issues réparties par module (A1-A6, B1-B2, C1-C2, G1), milestones Sprint 2
-  à 4, Kanban public.
-- Commits et PR signés par module : backend (Mourad), IA et intégration
-  (Olivier), maquette et dashboard (Olivier en reprise de NTYAM Angue),
-  simulateur (NTEINTIE Mounpain).
-- Preuve : `git log`, [PR #25](https://github.com/stevetelecom/agro-data/pull/25),
-  `docs/livrables/SPRINT_2_REVIEW.md` et `SPRINT_3_REVIEW.md`.
+  à 4, Kanban public : la répartition du **travail prévu** est tracée.
+- Seule la PR #25 (backend de Mourad) est passée par une branche et une revue.
+  Les 33 autres commits sont du SM, directement sur `main`, et les blocs
+  simulateur/boîtier (Mounpain) et dashboard (Patrick) n'ont produit aucun
+  commit.
+- Conséquence : l'historique ne montre pas le travail de chaque membre, il
+  montre celui du SM. L'écart est assumé (voir `SPRINT_4_REVIEW.md` §9.1) et
+  laisse le critère **partiel**.
+- Preuve : `git log --format='%an' | sort | uniq -c`,
+  [PR #25](https://github.com/stevetelecom/agro-data/pull/25),
+  `docs/livrables/SPRINT_4_REVIEW.md`.
 
 ---
 

@@ -46,7 +46,7 @@ principales**, suivies au sprint suivant. Le format est celui du classique
 | R2-1 | Poser un tag annoté à la fin de **chaque** sprint, avec un message qui dit explicitement si l'incrément est complet ou partiel | SM | fin de chaque sprint | ✅ fait le 10/11 (`v2`, `v3`), en retard |
 | R2-2 | Ne plus bloquer une livraison sur la disponibilité du PO : figer une version provisoire, la signaler « en attente de confirmation », et la réviser dès son retour | SM | immédiat | ✅ appliqué (contrat v1.0 → v1.2) |
 | R2-3 | Le SM reprend les modules dont le titulaire ne livre pas, pour ne pas laisser un ticket orphelin | SM | immédiat | ✅ appliqué (MOD-B1, MOD-B2 repris) |
-| R2-4 | Une PR doit être fusionnable à la fin du sprint ; sinon elle est découpée | tous | Sprint 3 | ⚠️ partiellement appliqué (PR #25 toujours ouverte) |
+| R2-4 | Une PR doit être fusionnable à la fin du sprint ; sinon elle est découpée | tous | Sprint 3 | ⚠️ partiellement appliqué (PR #25 fusionnée le 10/11, en retard) |
 
 ---
 
@@ -95,15 +95,49 @@ principales**, suivies au sprint suivant. Le format est celui du classique
 
 ## Sprint 4 — Restitution et intégration
 
-**Prévue le** : 11/11/2026
+**Tenue le** : 11/11/2026 — section rédigée le 10/11 à partir de l'état du
+dépôt, à confirmer en séance.
 
-Rétrospective à tenir après la Sprint Review. Les points à examiner, déjà
-connus :
+### Ce qui a marché
 
-- l'issue du blocage PR #25 et son effet sur la démonstration ;
-- le respect (ou non) de la règle « une PR = un module » (R3-3) ;
-- la qualité de la démo de secours (R3-4) ;
-- ce que l'équipe referait différemment sur la répartition des modules.
+- Le backend a été livré en entier et fusionné (PR #25) : 79 tests verts en CI,
+  contrat JSON testé, ingestion chiffrée, CRUD, KPIs et prix.
+- Les modules métier purs (`infestation`, `pricing`, `pipeline`) ont été
+  testables seuls et ont survécu au blocage de la PR, contrairement aux routes.
+- Le plan de secours (démo hors ligne sur la maquette) était prêt avant la
+  revue : aucune improvisation le jour J.
+- Le Kanban a été remis à jour la veille (5 issues fermées avec preuves,
+  cases cochées) au lieu de rester décorrélé du code.
+
+### Ce qui n'a pas marché
+
+- **Deux blocs entiers sans code exécutable** : simulateur/boîtier (C) et
+  dashboard (B). Les assignés n'ont livré aucun commit utile en quatre
+  sprints, et le SM n'a pas escaladé assez tôt (action R3-5 non appliquée).
+- **Travail direct sur `main` assumé par le SM** : 33 des 35 commits y sont
+  allés directement, sans PR ni revue. Ce n'est pas un oubli mais une pratique
+  choisie (seul développeur backend, itérations courtes) ; elle reste un écart
+  à la DoD, et le critère §17.8 (historique montrant le travail de chacun) n'est
+  pas satisfait. À trancher avec le PO : entériner la pratique dans la DoD ou
+  revenir à des branches courtes fusionnées.
+- **Le PO n'a validé aucun artefact** depuis le Sprint 2 : contrat, design
+  system, critères §17 et PV de recette sont restés en attente jusqu'à la
+  veille de la livraison.
+- **Le board a menti jusqu'au 10/11** : issues terminées encore ouvertes,
+  cases non cochées, statuts obsolètes. Le pilotage s'est fait sur le code, pas
+  sur le Kanban.
+- Une case de l'issue #20 annonçait une intégration E2E « simulateur → API »
+  alors que le simulateur n'existe pas : corrigée le 10/11.
+
+### Actions
+
+| Réf. | Action | Porteur | Échéance |
+|---|---|---|---|
+| R4-1 | Créer le tag `v-final` après la revue, avec un message listant explicitement ce qui est livré et ce qui ne l'est pas | SM | 11/11 |
+| R4-2 | Livrer #6, #12, #8 et #22 en PR séparées, avec un test par issue, avant toute nouvelle démonstration | Mounpain, Patrick | prochaine itération |
+| R4-3 | Ne plus jamais cocher une case sans preuve exécutable (test, route, capture) | tous | immédiat |
+| R4-4 | Obtenir la validation du PO sur le contrat, le design system et les critères §17, ou consigner formellement son absence en Review | PO + SM | 11/11 |
+| R4-5 | Découper chaque module en tickets de 2 jours maximum et vérifier l'avancement à mi-sprint, pas à J-1 | SM | prochaine itération |
 
 ---
 
@@ -115,8 +149,13 @@ connus :
 | R2-2 version provisoire du contrat | S2 | ✅ appliqué |
 | R2-3 reprise des modules orphelins | S2 | ✅ appliqué |
 | R2-4 PR fusionnable en fin de sprint | S2 | ⚠️ partiel |
-| R3-1 trancher la PR #25 | S3 | ✅ tranché (attente PO) |
+| R3-1 trancher la PR #25 | S3 | ✅ fusionnée le 10/11 à 13:16 |
 | R3-2 livrer la couche métier seule | S3 | ✅ appliqué |
-| R3-3 une PR = un module | S3 | ⏳ Sprint 4 |
-| R3-4 démo de secours | S3 | ⏳ en cours |
-| R3-5 suppléant par module | S3 | ⏳ Sprint 4 |
+| R3-3 une PR = un module | S3 | ❌ non appliqué — travail direct sur `main` assumé par le SM |
+| R3-4 démo de secours | S3 | ✅ maquette prête (`maquettes/agro-data-maquette.html`) |
+| R3-5 suppléant par module | S3 | ❌ non appliqué (blocs B et C sans code) |
+| R4-1 tag `v-final` après la revue | S4 | ⏳ en attente de la revue |
+| R4-2 livrer #6, #12, #8, #22 en PR | S4 | ⏳ prochaine itération |
+| R4-3 aucune case cochée sans preuve | S4 | ✅ appliqué le 10/11 (issue #20 corrigée) |
+| R4-4 validation PO ou absence consignée | S4 | ⏳ 11/11 |
+| R4-5 tickets de 2 jours maximum | S4 | ⏳ prochaine itération |

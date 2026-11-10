@@ -36,9 +36,9 @@ REST.
 
 ### Points de vigilance
 
-1. **La PR #25 conditionne #18, #20, #21, #22.** Décision du 10/11 : attente de
-   la validation PO. Si elle n'arrive pas avant le 11/11, la démonstration
-   bascule sur le plan de secours (§5).
+1. **La PR #25 est fusionnée depuis le 10/11 (13:16).** Le backend est donc sur
+   `main`, CI verte. Les issues #18, #20, #21 et #22 ne dépendent plus que de
+   leurs auteurs ; le plan de secours (§5) ne concerne plus que le frontend.
 2. **Le modèle `Plot` doit exposer `village` et `surface_ha`** (contrat §4.6,
    maquette écran 3). C'est un ajout de champs, pas une rupture : il peut être
    fait dans la PR #25 avant fusion.
@@ -81,12 +81,13 @@ dans [`CRITERES_ACCEPTATION.md`](CRITERES_ACCEPTATION.md).
 
 ## 5. Plan de secours (action R3-4)
 
-Si le backend n'est pas fusionné le 11/11, la démonstration se fait **sans
+Si le dashboard n'est pas prêt le 11/11, la démonstration se fait **sans
 réseau** sur `maquettes/agro-data-maquette.html`, qui contient les 6 écrans et
 des données simulées. Dans ce cas :
 
 - la démonstration annonce clairement ce qui est simulé et ce qui est réel ;
-- la partie backend est présentée sur la PR #25 (Swagger, 26 tests verts) ;
+- la partie backend est présentée sur Swagger (`/docs`) et par l'API réelle
+  (CI verte, 79 tests) ;
 - l'écart est consigné dans le compte-rendu de Review, sans le masquer.
 
 ## 6. Livrables attendus le 11/11
@@ -105,7 +106,7 @@ des données simulées. Dans ce cas :
 
 | Sujet | Décideur | Échéance |
 |---|---|---|
-| Fusion de la PR #25 | PO | avant le 11/11 |
+| Fusion de la PR #25 | PO | ✅ fusionnée le 10/11 à 13:16 |
 | Validation du contrat v1.2 | PO | avant le 11/11 |
 | Validation des critères §17.1 à §17.8 | PO | 11/11 |
 | Sort de #12 et #14 si non livrés | PO | 11/11, consigné en Review |
