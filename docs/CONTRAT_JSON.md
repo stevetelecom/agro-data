@@ -1,13 +1,16 @@
 # Contrat d'échange JSON — AGRO-DATA
 
-**Version** : 1.0
+**Version** : 1.1
 **Date** : 10 novembre 2026
 **Statut** : figée par le Scrum Master, **en attente de confirmation du Product Owner**
 **Référence** : cahier des charges §12.1, §12.2, §17.1 et §17.6
+**Maquette de référence** : `maquettes/agro-data-maquette.html` (commit `10e7d3b`), voir `docs/DESIGN_SYSTEM.md`
 **Implémentation** : `backend/app/schemas/measurement.py` (schémas Pydantic)
 **Tests** : `backend/tests/test_contract.py`
 
 Ce document est la référence unique pour tout ce qui échange des mesures : simulateur (#6), firmware (#19), backend (#5), IA (#14) et dashboard (#16). Toute modification doit être faite ici **et** dans le schéma Pydantic, dans le même commit.
+
+La version 1.1 ajoute les **modèles de lecture** attendus par les six écrans de la maquette (§4.4 à §4.7). Le message d'ingestion (§3) est inchangé.
 
 ---
 
@@ -136,6 +139,131 @@ Même structure que 4.1, en tableau. Authentification par JWT (`Authorization: B
 
 ---
 
+### 4.4 Indicateurs du tableau de bord — `GET /api/v1/kpis`
+
+Alimente les quatre cartes et le graphique d'humidité de l'écran 2 de la maquette. Authentification JWT (`admin`, `acheteur`). Paramètres : `days` (défaut `7`), `plot_id` (optionnel).
+
+```json
+{
+  "global_infestation_index": 62,
+  "level": "eleve",
+  "active_alerts": 2,
+  "avg_air_humidity_pct": 83.0,
+  "humidity_delta_7d": 4.0,
+  "estimated_healthy_volume_pct": 57,
+  "plots_monitored": 4,
+  "generated_at": "2026-11-10T11:00:00Z",
+  "humidity_series": [
+    {
+      "plot_id": 1,
+      "plot_name": "Parcelle Nkoulou",
+      "under_alert": true,
+      "points": [
+        { "date": "2026-11-04", "air_humidity_pct": 78.0 },
+        { "date": "2026-11-05", "air_humidity_pct": 80.0 },
+        { "date": "2026-11-06", "air_humidity_pct": 83.0 },
+        { "date": "2026-11-07", "air_humidity_pct": 86.0 },
+        { "date": "2026-11-08", "air_humidity_pct": 88.0 },
+        { "date": "2026-11-09", "air_humidity_pct": 87.0 },
+        { "date": "2026-11-10", "air_humidity_pct": 89.0 }
+      ]
+    }
+  ]
+}
+```
+
+| Champ | Type | Règle de calcul |
+|---|---|---|
+| `global_infestation_index` | entier 0 à 100 | moyenne des indices par parcelle (RM2) |
+| `level` | chaîne | `faible` si l'indice < 30, `modere` de 30 à 60, `eleve` si > 60 |
+| `active_alerts` | entier | nombre de parcelles avec plus de 48 h consécutives au-dessus de 85 % (RM1) |
+| `avg_air_humidity_pct` | réel | humidité de l'air moyenne sur la fenêtre |
+| `humidity_delta_7d` | réel | écart en points avec la moyenne des 7 jours précédents |
+| `estimated_healthy_volume_pct` | entier | `max(20, 100 − 0,7 × indice)` — **hypothèse de démonstration**, à calibrer avec l'ICCO |
+| `plots_monitored` | entier | nombre de parcelles suivies |
+| `humidity_series` | tableau | une série de `days` points par parcelle suivie, `under_alert` à `true` si la parcelle est en alerte RM1 |
+
+Les seuils de `level` sont ceux de la maquette et de RM2 : la couleur de la pastille en dépend (`--ok`, `--mod`, `--ko`).
+
+### 4.5 Courbe de prix prédictive — `GET /api/v1/prices/forecast`
+
+Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `days` (défaut `7`).
+
+```json
+{
+  "unit": "FCFA/kg",
+  "horizon_days": 7,
+  "is_demo": true,
+  "formula_version": "v1",
+  "points": [
+    { "date": "2026-11-04", "reference_price": 1050, "adjusted_price": 1050 },
+    { "date": "2026-11-05", "reference_price": 1060, "adjusted_price": 1065 },
+    { "date": "2026-11-06", "reference_price": 1055, "adjusted_price": 1070 },
+    { "date": "2026-11-07", "reference_price": 1070, "adjusted_price": 1100 },
+    { "date": "2026-11-08", "reference_price": 1065, "adjusted_price": 1120 },
+    { "date": "2026-11-09", "reference_price": 1080, "adjusted_price": 1160 },
+    { "date": "2026-11-10", "reference_price": 1085, "adjusted_price": 1185 }
+  ]
+}
+```
+
+- `reference_price` est le prix de référence, `adjusted_price` le prix ajusté selon l'indice (RM3).
+- `is_demo` reste à `true` tant que les coefficients ne sont pas calibrés : le dashboard **doit** afficher la mention « courbe de démonstration ».
+- `formula_version` est journalisé avec chaque calcul (RM5, audit).
+
+### 4.6 Parcelles — `/api/v1/plots`
+
+Écran 3 (tableau CRUD) et formulaire modal. Authentification JWT ; écriture réservée au rôle `admin`.
+
+```json
+{
+  "id": 1,
+  "name": "Parcelle Nkoulou",
+  "village": "Ambam centre",
+  "surface_ha": 3.2,
+  "hours_above_85": 62,
+  "ia_detection_rate": 0.55,
+  "infestation_index": 82,
+  "level": "eleve"
+}
+```
+
+| Champ | Type | Écriture | Règle |
+|---|---|---|---|
+| `name` | chaîne | oui | 1 à 40 caractères, obligatoire |
+| `village` | chaîne | oui | 1 à 40 caractères, obligatoire |
+| `surface_ha` | réel | oui | > 0, pas à 0,1 près |
+| `hours_above_85` | entier | **non** | calculé sur les mesures, 0 à 168 |
+| `ia_detection_rate` | réel | **non** | calculé sur les mesures, 0 à 1 |
+| `infestation_index` | entier | non | RM2 |
+| `level` | chaîne | non | `faible`, `modere`, `eleve` |
+
+Le formulaire de la maquette laisse saisir `hours_above_85` et `ia_detection_rate` : c'est un raccourci de démonstration. Dans l'API réelle, ces deux valeurs sont **en lecture seule**, sinon l'indice devient falsifiable.
+
+`DELETE /api/v1/plots/{id}` est refusé (`409`) si des appareils sont encore rattachés à la parcelle.
+
+### 4.7 Diagnostic IA — `POST /api/v1/diagnostic`
+
+Écran 4. Corps `multipart/form-data`, champ `image` (JPEG ou PNG, 5 Mo maximum). Authentification JWT.
+
+```json
+{
+  "phytophthora_detected": 1,
+  "confidence": 0.87,
+  "label": "pourriture brune",
+  "recommendation": "Pulvérisation ciblée sur la parcelle concernée.",
+  "model": "mobilenetv2-v1",
+  "is_demo": true
+}
+```
+
+- `phytophthora_detected` : `0` sain, `1` détecté — même sémantique que `diagnostic_ia` du message d'ingestion.
+- `confidence` : 0 à 1 ; la maquette l'affiche en pourcentage.
+- `is_demo` : `true` tant que le modèle n'est pas entraîné sur un jeu d'images validé.
+- Une image illisible ou d'un autre type que JPEG/PNG → `422`.
+
+---
+
 ## 5. Exemples rejetés
 
 Humidité hors plage physique :
@@ -192,6 +320,10 @@ Ces points ne bloquent pas le développement, mais doivent être tranchés avant
 | `geo_enc` en clair dans la zone brute | exclure le champ du dump brut, ou chiffrer avant écriture | revue PR #25, point 2, BNF3 |
 | `confidence` obligatoire ou non | garder obligatoire ; le simulateur fournit toujours une valeur | #6 |
 | Unité de `timestamp` | secondes Unix UTC confirmé ; le simulateur doit convertir depuis `datetime` | #6 |
+| Identifiants de démo | aligner le seed backend sur la maquette (`acheteur@ebolowa.cm` / `demo1234`) pour que la démo fonctionne sans retouche | #8, #16, `docs/DESIGN_SYSTEM.md` §8 |
+| Champs de `Plot` | ajouter `village` et `surface_ha` au modèle, à la place de `location_label` | #18, `docs/DESIGN_SYSTEM.md` §8 |
+| `humidity_series` dans `/kpis` | série agrégée par jour et par parcelle, plutôt qu'un appel `/measurements` par graphique | #13, #16 |
+| Formule du volume sain | `max(20, 100 − 0,7 × indice)` est une hypothèse de démonstration, à calibrer | #13 |
 
 ---
 
@@ -200,3 +332,4 @@ Ces points ne bloquent pas le développement, mais doivent être tranchés avant
 | Version | Date | Auteur | Changement |
 |---|---|---|---|
 | 1.0 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Première version figée à partir du CDC §12.1 et du schéma Pydantic de la PR #25 |
+| 1.1 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Ajout des modèles de lecture du dashboard (§4.4 à §4.7) alignés sur la maquette `agro-data-maquette.html` |

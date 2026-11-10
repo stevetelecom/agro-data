@@ -11,7 +11,9 @@ Scrum Master : MEKONTSO Olivier Steve - Product Owner : MESSANGA MESSANGA Mike
 - [Product Backlog](docs/PRODUCT_BACKLOG.md)
 - [Cahier des charges](docs/CAHIER_DES_CHARGES.md)
 - [Plan de codage](docs/PLAN_DE_CODAGE.md)
-- [Contrat d'échange JSON](docs/CONTRAT_JSON.md) : format des mesures, version 1.0
+- [Contrat d'échange JSON](docs/CONTRAT_JSON.md) : format des mesures, version 1.1
+- [Design system](docs/DESIGN_SYSTEM.md) : palette, composants, écrans, écarts avec le backend
+- [Maquette interactive](maquettes/agro-data-maquette.html) : 6 écrans, thème cacao, mode sombre
 - [Issues](https://github.com/stevetelecom/agro-data/issues) : une issue par tâche, assignée et priorisée
 - [Kanban](https://github.com/users/stevetelecom/projects/2) : colonnes À faire / En cours / Terminé
 - [Milestones](https://github.com/stevetelecom/agro-data/milestones) : Sprint 2, Sprint 3, Sprint 4
