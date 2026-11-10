@@ -1,0 +1,94 @@
+<!--
+  Rôle : application dashboard (indicateurs, graphiques, tableaux, gestion).
+  Auteur : NEGOUE Patrick
+  Bloc : B (MOD-B3, MOD-B4)
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tableau de bord · AGRO-DATA</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2317382c'/%3E%3Cpath d='M8 23c3-9 11-13 16-14-3 7-7 11-16 14z' fill='%23e7c27a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/jqwidgets/styles/jqx.base.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script>
+    if (location.protocol === "file:") document.documentElement.classList.add("file-protocol");
+  </script>
+</head>
+<body>
+  <p class="file-banner">
+    Ouvrez AGRO-DATA depuis son adresse web. Le fichier ouvert directement dans le navigateur ne charge pas la configuration.
+  </p>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <svg width="36" height="36" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="10" fill="#245743"/>
+          <path d="M8 23c3-9 11-13 16-14-3 7-7 11-16 14z" fill="#e7c27a"/>
+        </svg>
+        <div>
+          <strong>AGRO-DATA</strong>
+          <small>Ambam · cacao</small>
+        </div>
+      </div>
+      <button class="side-link is-active" type="button" data-nav="dashboard" aria-current="page"><span class="material-symbols-outlined" aria-hidden="true">dashboard</span> Tableau de bord</button>
+      <button class="side-link" type="button" data-nav="mesures"><span class="material-symbols-outlined" aria-hidden="true">monitoring</span> Mesures</button>
+      <button class="side-link" type="button" data-nav="parcelles"><span class="material-symbols-outlined" aria-hidden="true">yard</span> Parcelles</button>
+      <button class="side-link" type="button" data-nav="appareils"><span class="material-symbols-outlined" aria-hidden="true">sensors</span> Appareils</button>
+      <button class="side-link" type="button" data-nav="abonnes"><span class="material-symbols-outlined" aria-hidden="true">group</span> Abonnés</button>
+      <button class="side-link" type="button" data-nav="terrain"><span class="material-symbols-outlined" aria-hidden="true">eco</span> Lecture terrain</button>
+      <button class="side-link" type="button" data-nav="journal"><span class="material-symbols-outlined" aria-hidden="true">receipt_long</span> Journal des prix</button>
+      <div class="sidebar-foot">
+        <p id="mode-label" class="mode-label"></p>
+        <button id="reset-demo" class="btn btn-ghost" type="button" data-action="reset-demo" hidden>Réinitialiser</button>
+        <button class="btn btn-ghost" type="button" data-action="logout">Quitter</button>
+      </div>
+    </aside>
+    <button class="nav-backdrop" type="button" data-action="menu" aria-label="Fermer le menu"></button>
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-title">
+          <button class="icon-btn menu-btn" type="button" data-action="menu" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="sidebar">
+            <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          </button>
+          <div>
+            <p class="eyebrow">AGRO-DATA</p>
+            <h1 id="view-title">Tableau de bord</h1>
+          </div>
+        </div>
+        <div class="user-chip">
+          <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+          <span>
+            <strong id="user-name"></strong>
+            <small id="user-role"></small>
+          </span>
+        </div>
+      </header>
+      <main id="view"></main>
+    </div>
+  </div>
+  <div id="toast-root" aria-live="polite"></div>
+  <div id="modal-root"></div>
+  <script src="vendor/jquery.min.js"></script>
+  <script src="vendor/jqwidgets/jqxcore.js"></script>
+  <script src="vendor/jqwidgets/jqxdata.js"></script>
+  <script src="vendor/jqwidgets/jqxbuttons.js"></script>
+  <script src="vendor/jqwidgets/jqxscrollbar.js"></script>
+  <script src="vendor/jqwidgets/jqxmenu.js"></script>
+  <script src="vendor/jqwidgets/jqxcheckbox.js"></script>
+  <script src="vendor/jqwidgets/jqxlistbox.js"></script>
+  <script src="vendor/jqwidgets/jqxdropdownlist.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.selection.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.columnsresize.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.filter.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.sort.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.pager.js"></script>
+  <script src="vendor/chart.umd.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
