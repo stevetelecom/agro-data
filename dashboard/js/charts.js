@@ -9,6 +9,7 @@ import { HUMIDITY_ALERT } from "./metrics.js";
 
 let charts = [];
 
+/** Détruit les graphiques Chart.js encore affichés. */
 export function destroyCharts() {
   charts.splice(0).forEach((chart) => chart.destroy());
 }
@@ -33,6 +34,10 @@ function baseOptions(yTitle) {
   };
 }
 
+/**
+ * Trace l'humidité, l'indice d'infestation et le prix prévisionnel.
+ * @returns {boolean} faux s'il n'y a aucune série à afficher
+ */
 export function renderCharts({ humidityCanvas, indexCanvas, priceCanvas, series, forecast }) {
   destroyCharts();
   if (!window.Chart || series.length === 0) return false;

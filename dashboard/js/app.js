@@ -265,7 +265,8 @@ function renderEntity(root, kind) {
   const holder = el("div", { class: "grid-holder", id: "entity-grid" });
   root.append(holder);
   mountGrid(holder, meta.columns, meta.rows, {
-    pageable: meta.rows.length > 8,
+    filterable: true,
+    pageable: true,
     height: 420,
     onSelect: (row) => {
       state.selectedId = row?.id || row?.boundindex && meta.rows[row.boundindex]?.id || null;
@@ -507,10 +508,9 @@ async function saveEntity(kind, existing) {
     plot: {
       title: existing ? "Modifier la parcelle" : "Nouvelle parcelle",
       fields: [
+        { name: "code", label: "Code", value: existing?.code || "", readOnly: Boolean(existing), hint: "2 à 32 caractères : lettres, chiffres et tirets. Exemple : P-EST." },
         { name: "name", label: "Nom", value: existing?.name || "" },
-        { name: "sector", label: "Secteur", value: existing?.sector || "" },
-        { name: "device_id", label: "Appareil", value: existing?.device_id || "AMB-P", hint: "Format AMB-P suivi de 3 chiffres." },
-        { name: "reference_volume_kg", label: "Volume de référence (kg)", type: "number", min: 0, step: "1", value: existing?.reference_volume_kg ?? 800 },
+        { name: "location_label", label: "Secteur", value: existing?.sector || "" },
       ],
       create: createPlot,
       update: updatePlot,
@@ -519,7 +519,8 @@ async function saveEntity(kind, existing) {
     device: {
       title: existing ? "Modifier l'appareil" : "Nouvel appareil",
       fields: [
-        { name: "device_id", label: "Identifiant", value: existing?.device_id || "AMB-P" },
+        { name: "device_id", label: "Identifiant", value: existing?.device_id || "AMB-P", hint: "Format AMB-P suivi de 3 chiffres." },
+        { name: "label", label: "Libellé", value: existing?.label || "" },
         {
           name: "plot_id",
           label: "Parcelle",
@@ -545,18 +546,8 @@ async function saveEntity(kind, existing) {
     subscriber: {
       title: existing ? "Modifier l'abonné" : "Nouvel abonné",
       fields: [
-        { name: "name", label: "Nom", value: existing?.name || "" },
-        { name: "email", label: "E-mail", type: "email", autocomplete: "off", value: existing?.email || "" },
-        {
-          name: "role",
-          label: "Rôle",
-          type: "select",
-          value: existing?.role || "acheteur",
-          options: [
-            { value: "acheteur", label: "Acheteur" },
-            { value: "admin", label: "Administrateur" },
-          ],
-        },
+        { name: "organization", label: "Organisation", value: existing?.name || "" },
+        { name: "email", label: "E-mail", type: "email", autocomplete: "off", value: existing?.email || "", readOnly: Boolean(existing) },
         {
           name: "plan",
           label: "Formule",
@@ -580,8 +571,8 @@ async function saveEntity(kind, existing) {
     submitLabel: existing ? "Enregistrer" : "Créer",
     fields: form.fields,
     onSubmit: async (values) => {
-      if (existing) await form.update(existing.id, values);
-      else await form.create(values);
+      if (existing) await form.update(existing.id, values, state.db);
+      else await form.create(values, state.db);
       showToast(form.done);
       await reload();
       return null;
@@ -593,7 +584,7 @@ async function removeEntity(kind, record) {
   const messages = {
     plot: {
       title: "Supprimer la parcelle",
-      message: `${record.name} : la parcelle, l'appareil lié et les mesures associées seront retirés.`,
+      message: `${record.name} sera retirée de la liste des parcelles.`,
       confirm: "Supprimer",
       toast: "Parcelle supprimée.",
       run: deletePlot,
@@ -607,7 +598,7 @@ async function removeEntity(kind, record) {
     },
     subscriber: {
       title: "Supprimer l'abonné",
-      message: `${record.name} sera retiré de l'annuaire.`,
+      message: `${record.name || record.email} sera retiré de l'annuaire.`,
       confirm: "Supprimer",
       toast: "Abonné supprimé.",
       run: deleteSubscriber,

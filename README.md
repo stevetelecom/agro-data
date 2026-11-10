@@ -13,9 +13,14 @@ python3 -m http.server 8080
 
 Puis ouvrir `http://127.0.0.1:8080/dashboard/`.
 
-Comptes de démonstration si l'API FastAPI ne répond pas :
+Comptes de test de l'API :
 
-- `admin@agrodata.local` / `Admin2026!` (gestion des parcelles, appareils, abonnés)
-- `acheteur@agrodata.local` / `Acheteur2026!` (lecture)
+- `lecteur@agro-data.local` / `ChangeMe123!` (acheteur)
+- `acheteur@agro-data.local` / `ChangeMe123!` (administration)
+
+Si l'API ne répond pas :
+
+- `acheteur@agrodata.local` / `Acheteur2026!`
+- `admin@agrodata.local` / `Admin2026!`
 
 L'adresse de l'API est `API_BASE_URL` dans le fichier `.env` à la racine du dépôt.

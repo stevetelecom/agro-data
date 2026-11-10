@@ -6,11 +6,12 @@ Auteur : NKWANE Mourad.
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import SessionLocal, init_db
 from app.routers import auth, devices, measurements, plots, subscribers
-from app.seed import ensure_demo_user
+from app.seed import ensure_demo_user, ensure_trial_dataset
 
 
 @asynccontextmanager
@@ -20,6 +21,7 @@ async def lifespan(_: FastAPI):
     db = SessionLocal()
     try:
         ensure_demo_user(db)
+        ensure_trial_dataset(db)
     finally:
         db.close()
     yield
@@ -36,6 +38,12 @@ def create_app() -> FastAPI:
             "(modules MOD-A1, A2, A3, A6 — NKWANE Mourad)."
         ),
         lifespan=lifespan,
+    )
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     application.include_router(auth.router)
     application.include_router(measurements.router)

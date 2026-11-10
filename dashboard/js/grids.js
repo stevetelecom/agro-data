@@ -140,6 +140,12 @@ function paintTable(holder, columns, rows, options) {
   holder.append(scroll);
 }
 
+/**
+ * Affiche un tableau jQWidgets, ou un tableau HTML si la bibliothèque est absente.
+ * @param {HTMLElement} holder
+ * @param {{field: string, label: string, type?: string, width?: string, render?: Function}[]} columns
+ * @param {object[]} rows
+ */
 export function mountGrid(holder, columns, rows, options = {}) {
   if (!holder) return;
   if (jqxReady()) {

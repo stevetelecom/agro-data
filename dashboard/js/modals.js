@@ -34,6 +34,11 @@ function showFieldErrors(slots, errors) {
   });
 }
 
+/**
+ * Ouvre une fenêtre de saisie et n'envoie rien tant que la validation échoue.
+ * @param {{title: string, submitLabel: string, fields: object[], onSubmit: Function}} options
+ * @returns {Promise<boolean>}
+ */
 export function openForm({ title, submitLabel, fields, onSubmit }) {
   const root = document.querySelector("#modal-root");
   return new Promise((resolve) => {
@@ -83,6 +88,7 @@ export function openForm({ title, submitLabel, fields, onSubmit }) {
         if (field.step) input.step = field.step;
         if (field.min !== undefined) input.min = String(field.min);
         if (field.autocomplete) input.autocomplete = field.autocomplete;
+        if (field.readOnly) input.readOnly = true;
       }
       input.name = field.name;
       input.required = true;
@@ -156,6 +162,11 @@ export function openForm({ title, submitLabel, fields, onSubmit }) {
   });
 }
 
+/**
+ * Demande une confirmation avant une suppression.
+ * @param {{title: string, message: string, confirmLabel: string}} options
+ * @returns {Promise<boolean>}
+ */
 export function openConfirm({ title, message, confirmLabel }) {
   const root = document.querySelector("#modal-root");
   return new Promise((resolve) => {

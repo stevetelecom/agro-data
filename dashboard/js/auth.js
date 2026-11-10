@@ -16,13 +16,48 @@ const DEMO_USERS = [
 ];
 
 /**
- * Lit la session courante dans le navigateur.
- * @returns {{email: string, name: string, role: string, token: string, mode: string} | null}
+ * Lit la charge utile d'un JWT sans vérifier la signature.
+ * La signature est contrôlée par l'API à chaque requête.
+ * @param {string} token
+ * @returns {{sub?: string, role?: string, exp?: number} | null}
+ */
+export function readTokenClaims(token) {
+  try {
+    const part = String(token ?? "").split(".")[1];
+    if (!part) return null;
+    const padded = part.replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(padded.padEnd(Math.ceil(padded.length / 4) * 4, "="));
+    const claims = JSON.parse(json);
+    return claims && typeof claims === "object" ? claims : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Indique si un jeton d'API a dépassé sa date d'expiration.
+ * @param {{mode?: string, expiresAt?: number} | null} session
+ * @param {number} nowMs
+ */
+export function isSessionExpired(session, nowMs = Date.now()) {
+  if (!session || session.mode !== "api" || !session.expiresAt) return false;
+  return nowMs >= Number(session.expiresAt) * 1000;
+}
+
+/**
+ * Lit la session courante. Une session API expirée est effacée.
+ * @returns {{email: string, name: string, role: string, token: string, mode: string, expiresAt: number | null} | null}
  */
 export function getSession() {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (isSessionExpired(session)) {
+      sessionStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return session;
   } catch {
     return null;
   }
@@ -98,30 +133,37 @@ export async function login(email, password) {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
       body: JSON.stringify({ email: identity, password: secret }),
-      signal: AbortSignal.timeout(2500),
+      signal: AbortSignal.timeout(8000),
     });
-    if (response.status === 401 || response.status === 403 || response.status === 422) {
+      if (response.status === 401 || response.status === 403 || response.status === 422) {
       const payload = await response.json().catch(() => ({}));
-      throw new Error(payload.message || "Identifiants refusés.");
+      const detail = typeof payload.detail === "string" ? payload.detail : payload.message;
+      const rejected = new Error(detail || "Identifiants refusés.");
+      rejected.loginRejected = true;
+      throw rejected;
     }
     if (response.ok) {
       const payload = await response.json();
       const token = payload.access_token || payload.token;
-      if (!token) throw new Error("La connexion n'a pas abouti. Réessayez.");
-      const user = payload.user || {};
+      if (!token) {
+        const rejected = new Error("La connexion n'a pas abouti. Réessayez.");
+        rejected.loginRejected = true;
+        throw rejected;
+      }
+      const claims = readTokenClaims(token) || {};
+      const email = String(claims.sub || identity);
       saveSession({
-        email: user.email || identity,
-        name: user.name || identity,
-        role: user.role === "admin" ? "admin" : "acheteur",
+        email,
+        name: email,
+        role: claims.role === "admin" ? "admin" : "acheteur",
         token,
         mode: "api",
+        expiresAt: Number(claims.exp) || null,
       });
       return;
     }
   } catch (error) {
-    if (error.message === "Identifiants refusés." || error.message === "La connexion n'a pas abouti. Réessayez.") {
-      throw error;
-    }
+    if (error.loginRejected) throw error;
   }
 
   const demo = DEMO_USERS.find((user) => user.email === identity && user.password === secret);

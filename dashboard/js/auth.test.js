@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getSession, login, logout, togglePasswordState, validateLogin } from "./auth.js";
+import { getSession, isSessionExpired, login, logout, togglePasswordState, validateLogin } from "./auth.js";
 
 /**
  * Remplace le stockage de session, absent hors navigateur.
@@ -66,6 +66,60 @@ test("ouvre une session de démonstration quand l'API est injoignable", async ()
   assert.equal(session.mode, "demo");
   logout();
   assert.equal(getSession(), null);
+});
+
+function bearer(payload) {
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  return `eyJhbGciOiJIUzI1NiJ9.${body}.signature`;
+}
+
+test("enregistre le jeton de l'API dans la session, sans le mot de passe", async () => {
+  installSessionStorage();
+  const exp = Math.floor(Date.now() / 1000) + 3600;
+  const token = bearer({ sub: "lecteur@agro-data.local", role: "acheteur", exp });
+  globalThis.fetch = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({ access_token: token, token_type: "bearer" }),
+  });
+  await login("lecteur@agro-data.local", "ChangeMe123!");
+  const session = getSession();
+  assert.equal(session.mode, "api");
+  assert.equal(session.role, "acheteur");
+  assert.equal(session.email, "lecteur@agro-data.local");
+  assert.equal(session.token, token);
+  assert.equal(session.expiresAt, exp);
+  assert.equal(session.password, undefined);
+  logout();
+});
+
+test("ne bascule pas en démonstration quand l'API refuse les identifiants", async () => {
+  installSessionStorage();
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 401,
+    json: async () => ({ detail: "Identifiants invalides" }),
+  });
+  await assert.rejects(
+    () => login("acheteur@agrodata.local", "Acheteur2026!"),
+    /Identifiants invalides/,
+  );
+  assert.equal(getSession(), null);
+});
+
+test("efface une session dont le jeton a expiré", () => {
+  installSessionStorage();
+  const expired = {
+    email: "lecteur@agro-data.local",
+    role: "acheteur",
+    token: "expired",
+    mode: "api",
+    expiresAt: Math.floor(Date.now() / 1000) - 30,
+  };
+  assert.equal(isSessionExpired(expired), true);
+  sessionStorage.setItem("agro_session", JSON.stringify(expired));
+  assert.equal(getSession(), null);
+  assert.equal(sessionStorage.getItem("agro_session"), null);
 });
 
 test("refuse des identifiants de démonstration incorrects", async () => {
