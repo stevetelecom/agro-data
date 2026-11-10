@@ -67,6 +67,15 @@ cd backend
 pytest -q
 ```
 
+### Scénario de démonstration
+
+Avec le backend démarré, le parcours de bout en bout se rejoue en une commande
+(ingestion 48 h, rejet d'une mesure malveillante, diagnostic IA, KPIs, prix) :
+
+```bash
+python scripts/demo_e2e.py
+```
+
 ## API principale
 
 | Méthode | Route | Rôle |

@@ -21,6 +21,12 @@ prouvent ce qu'il avance.
 Les rétrospectives sont regroupées dans [`RETROSPECTIVES.md`](RETROSPECTIVES.md),
 avec le suivi des actions d'un sprint sur l'autre.
 
+## Recette
+
+| Document | Contenu |
+|---|---|
+| [`CRITERES_ACCEPTATION.md`](CRITERES_ACCEPTATION.md) | les 8 critères du CDC §17, leur statut et leur preuve exécutable (tests, routes, commits) |
+
 ## Versions du dossier
 
 | Version | Date | Contenu |

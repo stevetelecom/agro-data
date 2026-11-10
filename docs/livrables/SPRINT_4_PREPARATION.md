@@ -67,14 +67,17 @@ Durée visée : 10 minutes.
 
 | # | Critère | Ticket | Statut au 10/11 |
 |---|---|---|---|
-| 1 | Un message JSON conforme arrive dans le Data Lake | #5, #6 | 🟡 ingestion livrée (PR #25), simulateur non fait |
+| 1 | Un message JSON conforme arrive dans le Data Lake | #5, #6 | ✅ prouvé par `tests/test_e2e.py` ; simulateur #6 remplacé par le test |
 | 2 | Une coupure réseau ne perd aucune mesure | #12 | ❌ non commencé |
-| 3 | Plus de 48 h au-dessus de 85 % déclenche une alerte | #13 | ✅ service + routes `/kpis` et `/prices/forecast` livrés, 77 tests |
+| 3 | Plus de 48 h au-dessus de 85 % déclenche une alerte | #13 | ✅ service + routes `/kpis` et `/prices/forecast` livrés, 79 tests |
 | 4 | Le prototype IA renvoie un drapeau et un score | #14 | 🟡 route `POST /diagnostic` livrée (stub déterministe, `is_demo: true`), modèle non entraîné |
-| 5 | L'acheteur voit les KPIs et obtient les mêmes données par l'API | #15, #16, #18 | 🟡 page KPIs livrée, branchement API réel à faire (#16) |
+| 5 | L'acheteur voit les KPIs et obtient les mêmes données par l'API | #15, #16, #18 | 🟡 page KPIs + courbe de prix branchées, tableau CRUD à faire (#16/#22) |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | #5, #10 | ✅ pipeline, `device_id` contraint, zone brute chiffrée |
 | 7 | Chaque action de gestion affiche un toast | #22 | ❌ non commencé |
 | 8 | L'historique Git montre le travail de chaque membre | #1, #3, #24 | ✅ |
+
+Le détail des preuves (tests, routes, commits) et les limites assumées sont
+dans [`CRITERES_ACCEPTATION.md`](CRITERES_ACCEPTATION.md).
 
 ## 5. Plan de secours (action R3-4)
 
