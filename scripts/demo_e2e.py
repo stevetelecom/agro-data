@@ -49,6 +49,14 @@ def _request(method: str, path: str, *, body: bytes | None = None, headers: dict
             return reponse.status, json.loads(brut) if brut else None
     except urllib.error.HTTPError as erreur:
         return erreur.code, json.loads(erreur.read() or b"{}")
+    except urllib.error.URLError as erreur:
+        raise SystemExit(
+            f"ÉCHEC : backend injoignable sur {API_BASE} ({erreur.reason}).\n"
+            "Démarre-le d'abord dans un autre terminal, depuis la racine :\n"
+            "  cd backend && python -m uvicorn app.main:app --port 8000\n"
+            "Si l'API écoute ailleurs : AGRO_API_BASE=http://127.0.0.1:PORT "
+            "python scripts/demo_e2e.py"
+        ) from None
 
 
 def _json(method: str, path: str, payload: dict, headers: dict | None = None):
