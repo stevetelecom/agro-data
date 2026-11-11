@@ -1,4 +1,116 @@
-// Rôle : afficher les graphiques Chart.js (humidité, indice, prix).
-// Auteur : NEGOUE Patrick (MOD-B3).
-// TODO (issue #16) : initialiser les premiers graphiques.
-// TODO (issue #22) : compléter les graphiques et les brancher sur l'API.
+/**
+ * Rôle : graphiques d'humidité, d'indice et de prix prédictif.
+ * Auteur : NEGOUE Patrick
+ * Bloc : B (MOD-B3)
+ */
+
+import { formatDateTime, formatNumber } from "./format.js";
+import { HUMIDITY_ALERT } from "./metrics.js";
+
+let charts = [];
+
+/** Détruit les graphiques Chart.js encore affichés. */
+export function destroyCharts() {
+  charts.splice(0).forEach((chart) => chart.destroy());
+}
+
+function reducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function baseOptions(yTitle) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: reducedMotion() ? false : { duration: 450 },
+    plugins: {
+      legend: { position: "bottom", labels: { boxWidth: 12, usePointStyle: true } },
+      tooltip: { mode: "index", intersect: false },
+    },
+    scales: {
+      x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
+      y: { title: { display: true, text: yTitle }, grid: { color: "rgba(28, 25, 21, 0.06)" } },
+    },
+  };
+}
+
+/**
+ * Trace l'humidité, l'indice d'infestation et le prix prévisionnel.
+ * @returns {boolean} faux s'il n'y a aucune série à afficher
+ */
+export function renderCharts({ humidityCanvas, indexCanvas, priceCanvas, series, forecast }) {
+  destroyCharts();
+  if (!window.Chart || series.length === 0) return false;
+  window.Chart.defaults.font.family = "Poppins, sans-serif";
+  window.Chart.defaults.color = "#5e564c";
+  const labels = series.map((point) => formatDateTime(point.timestamp));
+  charts.push(new window.Chart(humidityCanvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Humidité de l'air",
+          data: series.map((point) => point.humidity),
+          borderColor: "#245743",
+          backgroundColor: "rgba(36, 87, 67, 0.12)",
+          fill: true,
+          tension: 0.25,
+          pointRadius: 0,
+          borderWidth: 2,
+        },
+        {
+          label: "Seuil 85 %",
+          data: series.map(() => HUMIDITY_ALERT),
+          borderColor: "#9d2c2c",
+          borderDash: [5, 5],
+          pointRadius: 0,
+          borderWidth: 1.5,
+        },
+      ],
+    },
+    options: baseOptions("%"),
+  }));
+  charts.push(new window.Chart(indexCanvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Indice d'infestation",
+        data: series.map((point) => point.index),
+        borderColor: "#8c4a2f",
+        backgroundColor: "rgba(140, 74, 47, 0.08)",
+        fill: true,
+        tension: 0.25,
+        pointRadius: 0,
+        borderWidth: 2,
+      }],
+    },
+    options: {
+      ...baseOptions("Indice"),
+      scales: {
+        ...baseOptions("Indice").scales,
+        y: { ...baseOptions("Indice").scales.y, suggestedMin: 0, suggestedMax: 100 },
+      },
+    },
+  }));
+  charts.push(new window.Chart(priceCanvas, {
+    type: "line",
+    data: {
+      labels: forecast.map((point) => point.date),
+      datasets: [{
+        label: "Prix indicatif (FCFA/kg)",
+        data: forecast.map((point) => point.priceFcfaKg),
+        borderColor: "#8a6a32",
+        backgroundColor: "rgba(176, 137, 88, 0.16)",
+        fill: true,
+        tension: 0.2,
+        pointRadius: 3,
+        borderWidth: 2,
+      }],
+    },
+    options: baseOptions("FCFA/kg"),
+  }));
+  humidityCanvas.setAttribute("aria-label", `Humidité, dernier point ${formatNumber(series.at(-1)?.humidity)} %`);
+  return true;
+}

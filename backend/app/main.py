@@ -11,16 +11,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.database import SessionLocal, init_db
 from app.routers import auth, devices, diagnostic, kpis, measurements, plots, subscribers
-from app.seed import ensure_demo_user
+from app.seed import ensure_demo_user, ensure_trial_dataset
+
+
+def _seed_trial_dataset() -> bool:
+    """Le jeu de démonstration ne s'applique pas aux bases mémoire des tests."""
+    return get_settings().database_url.strip() != "sqlite://"
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    """Initialise le schéma SQLite et l'utilisateur démo au démarrage."""
+    """Initialise le schéma SQLite, l'utilisateur démo et les données de démonstration."""
     init_db()
     db = SessionLocal()
     try:
         ensure_demo_user(db)
+        if _seed_trial_dataset():
+            ensure_trial_dataset(db)
     finally:
         db.close()
     yield

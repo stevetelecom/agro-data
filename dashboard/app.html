@@ -1,70 +1,94 @@
+<!--
+  Rôle : application dashboard (indicateurs, graphiques, tableaux, gestion).
+  Auteur : NEGOUE Patrick
+  Bloc : B (MOD-B3, MOD-B4)
+-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>AGRO-DATA - Tableau de bord</title>
-  <meta name="description" content="Indicateurs de risque de pourriture brune du cacao, Ambam, Cameroun.">
-  <!-- Écrans 2 et 5 de la maquette (docs/DESIGN_SYSTEM.md §5). Issues #15, #16, #21. -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tableau de bord · AGRO-DATA</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2317382c'/%3E%3Cpath d='M8 23c3-9 11-13 16-14-3 7-7 11-16 14z' fill='%23e7c27a'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,300..700,0..1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/tokens.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/jqwidgets/styles/jqx.base.css">
   <link rel="stylesheet" href="css/app.css">
-  <script src="js/kpis.js" defer></script>
+  <script>
+    if (location.protocol === "file:") document.documentElement.classList.add("file-protocol");
+  </script>
 </head>
 <body>
-  <a class="saut" href="#vue">Aller au contenu principal</a>
-
-  <div id="app">
-    <aside>
-      <div class="logo">
-        <i aria-hidden="true"><span class="ms">spa</span></i>
+  <p class="file-banner">
+    Ouvrez AGRO-DATA depuis son adresse web. Le fichier ouvert directement dans le navigateur ne charge pas la configuration.
+  </p>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <svg width="36" height="36" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="10" fill="#245743"/>
+          <path d="M8 23c3-9 11-13 16-14-3 7-7 11-16 14z" fill="#e7c27a"/>
+        </svg>
         <div>
-          <b>AGRO-DATA</b>
-          <small>DAAS CACAO</small>
+          <strong>AGRO-DATA</strong>
+          <small>Ambam · cacao</small>
         </div>
       </div>
-
-      <nav id="nav" aria-label="Navigation principale">
-        <button type="button" data-vue="dash" aria-current="page">
-          <span class="ms" aria-hidden="true">space_dashboard</span>Tableau de bord
-        </button>
-        <button type="button" data-vue="prod">
-          <span class="ms" aria-hidden="true">smartphone</span>Vue producteur
-        </button>
-        <!-- Parcelles, Diagnostic IA et API REST : issues #16 et #22. -->
-      </nav>
-
-      <div class="user">
-        <i aria-hidden="true">A</i>
-        <div>
-          <b>Acheteur Ebolowa</b><br>
-          <span style="color:#d9b99a">Abonnement actif</span>
-        </div>
+      <button class="side-link is-active" type="button" data-nav="dashboard" aria-current="page"><span class="material-symbols-outlined" aria-hidden="true">dashboard</span> Tableau de bord</button>
+      <button class="side-link" type="button" data-nav="mesures"><span class="material-symbols-outlined" aria-hidden="true">monitoring</span> Mesures</button>
+      <button class="side-link" type="button" data-nav="parcelles"><span class="material-symbols-outlined" aria-hidden="true">yard</span> Parcelles</button>
+      <button class="side-link" type="button" data-nav="appareils"><span class="material-symbols-outlined" aria-hidden="true">sensors</span> Appareils</button>
+      <button class="side-link" type="button" data-nav="abonnes"><span class="material-symbols-outlined" aria-hidden="true">group</span> Abonnés</button>
+      <button class="side-link" type="button" data-nav="terrain"><span class="material-symbols-outlined" aria-hidden="true">eco</span> Lecture terrain</button>
+      <button class="side-link" type="button" data-nav="journal"><span class="material-symbols-outlined" aria-hidden="true">receipt_long</span> Journal des prix</button>
+      <div class="sidebar-foot">
+        <p id="mode-label" class="mode-label"></p>
+        <button id="reset-demo" class="btn btn-ghost" type="button" data-action="reset-demo" hidden>Réinitialiser</button>
+        <button class="btn btn-ghost" type="button" data-action="logout">Quitter</button>
       </div>
     </aside>
-
-    <main>
-      <header>
-        <h2 id="titre">Tableau de bord</h2>
-        <span class="sp"></span>
-        <span id="etat-source" class="etat" data-source="demo" role="status">Chargement…</span>
-        <button type="button" class="ib" id="actualiser" aria-label="Actualiser les indicateurs">
-          <span class="ms" aria-hidden="true">refresh</span>
-        </button>
-        <button type="button" class="ib" id="theme" aria-label="Changer de thème" aria-pressed="false">
-          <span class="ms" aria-hidden="true">contrast</span>
-        </button>
+    <button class="nav-backdrop" type="button" data-action="menu" aria-label="Fermer le menu"></button>
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-title">
+          <button class="icon-btn menu-btn" type="button" data-action="menu" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="sidebar">
+            <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          </button>
+          <div>
+            <p class="eyebrow">AGRO-DATA</p>
+            <h1 id="view-title">Tableau de bord</h1>
+          </div>
+        </div>
+        <div class="user-chip">
+          <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+          <span>
+            <strong id="user-name"></strong>
+            <small id="user-role"></small>
+          </span>
+        </div>
       </header>
-
-      <section id="vue" class="vue" tabindex="-1" aria-label="Indicateurs">
-        <p class="sub">Chargement des indicateurs…</p>
-      </section>
-    </main>
+      <main id="view"></main>
+    </div>
   </div>
-
-  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="toast-root" aria-live="polite"></div>
+  <div id="modal-root"></div>
+  <script src="vendor/jquery.min.js"></script>
+  <script src="vendor/jqwidgets/jqxcore.js"></script>
+  <script src="vendor/jqwidgets/jqxdata.js"></script>
+  <script src="vendor/jqwidgets/jqxbuttons.js"></script>
+  <script src="vendor/jqwidgets/jqxscrollbar.js"></script>
+  <script src="vendor/jqwidgets/jqxmenu.js"></script>
+  <script src="vendor/jqwidgets/jqxcheckbox.js"></script>
+  <script src="vendor/jqwidgets/jqxlistbox.js"></script>
+  <script src="vendor/jqwidgets/jqxdropdownlist.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.selection.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.columnsresize.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.filter.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.sort.js"></script>
+  <script src="vendor/jqwidgets/jqxgrid.pager.js"></script>
+  <script src="vendor/chart.umd.min.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

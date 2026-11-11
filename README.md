@@ -37,17 +37,22 @@ La base SQLite et les comptes de démonstration sont créés au premier démarra
 
 ### Tableau de bord
 
-Servir le dossier `dashboard/` avec un serveur statique, par exemple :
+Servir la **racine** du dépôt avec un serveur statique (le tableau de bord lit les
+modules ES sous `dashboard/js/`) :
 
 ```bash
-cd dashboard
-python -m http.server 5500       # http://127.0.0.1:5500/app.html
+python -m http.server 8080       # http://127.0.0.1:8080/dashboard/
 ```
 
-Le tableau de bord appelle `http://127.0.0.1:8000` par défaut (surchargeable via
-`window.AGRO_API_BASE`). Sans jeton dans `localStorage['agro_token']`, ou si l'API
-est injoignable, il bascule sur un jeu de démonstration conforme au contrat et
-l'indique dans l'en-tête.
+Le port 8080 est déjà autorisé par le CORS du backend. L'écran de connexion
+(`dashboard/index.html`) ouvre le tableau de bord complet (`app.html`) :
+indicateurs, examens, mesures, parcelles, appareils et abonnés.
+
+L'adresse de l'API est `http://127.0.0.1:8000` par défaut. Elle se surcharge avec
+la variable `API_BASE_URL` d'un fichier `.env` à la racine (fichier local, non
+versionné) ou avec `window.AGRO_API_BASE`. Si l'API est injoignable, l'écran de
+connexion bascule sur une session de démonstration et l'indique clairement ;
+une erreur d'identifiants n'entraîne jamais ce basculement.
 
 ### Comptes de démonstration
 
@@ -65,6 +70,13 @@ Ces comptes sont réservés à la démonstration. Les secrets par défaut de
 ```bash
 cd backend
 pytest -q
+```
+
+Les modules du tableau de bord ont leurs propres tests (Node ≥ 20) :
+
+```bash
+cd dashboard
+node --test js/*.test.js
 ```
 
 ### Scénario de démonstration
