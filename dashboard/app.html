@@ -17,6 +17,14 @@
   <link rel="stylesheet" href="css/app.css">
   <script>
     if (location.protocol === "file:") document.documentElement.classList.add("file-protocol");
+    // Thème choisi au clic : appliqué avant le premier rendu pour éviter un
+    // flash clair. Sans choix enregistré, la préférence système s'applique.
+    try {
+      const saved = localStorage.getItem("agro-data-theme");
+      if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+    } catch (error) {
+      /* stockage indisponible : préférence système */
+    }
   </script>
 </head>
 <body>

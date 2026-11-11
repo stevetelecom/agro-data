@@ -775,12 +775,22 @@ async function onClick(event) {
 
 /**
  * Bascule clair/sombre comme la maquette : lit le schéma appliqué, puis force
- * data-theme sur <html>. Les graphiques sont retracés avec les nouveaux jetons.
+ * data-theme sur <html>. Le choix est mémorisé pour survivre à un rechargement
+ * (la maquette ne le faisait pas). Les graphiques sont retracés avec les
+ * nouveaux jetons.
  */
+const THEME_KEY = "agro-data-theme";
+
 function toggleTheme() {
   const root = document.documentElement;
   const dark = getComputedStyle(root).colorScheme === "dark";
-  root.dataset.theme = dark ? "light" : "dark";
+  const next = dark ? "light" : "dark";
+  root.dataset.theme = next;
+  try {
+    localStorage.setItem(THEME_KEY, next);
+  } catch (error) {
+    /* stockage indisponible : le thème reste actif pour la session */
+  }
   render();
 }
 
