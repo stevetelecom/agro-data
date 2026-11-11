@@ -124,12 +124,12 @@ persistées, tampon vidé, aucun doublon.
 
 | Ticket | Raison | Conséquence sur la démo |
 |---|---|---|
-| #6 simulateur | Livré par le SM le 11/11 ; titulaire : 2 commits tardifs sur `sahoda`, non fusionnés | étape 1 de la démo assurée par `python -m simulator` |
+| #6 simulateur | Livré par le SM le 11/11 ; les 2 commits de `sahoda` sont fusionnés le 11/11 (`06e5d66`) sans reprendre leur implémentation, défaillante | étape 1 de la démo assurée par `python -m simulator` |
 | #12 store-and-forward | Livré par le SM le 11/11, testé contre l'API | critère §17.2 désormais couvert |
 | #19 boîtier | Écrit par le SM, **non compilé ni flashé** | pas de démonstration matérielle, seulement le simulateur |
 | #18 correctif | Branche de Mourad repoussée à l'identique de `main` (0 commit devant), correctif fait par le SM | `village` / `surface_ha` / `reference_volume_kg` désormais exposés par `/api/v1/plots` |
 | #20 prix v2 | Non spécifié, non implémenté | seul `formula_version = v1` est exposé |
-| #23 PV de recette | PO indisponible | recette non signée |
+| #23 PV de recette | PO indisponible | `PV_RECETTE.md` rédigé et validé par le SM mandaté (accepté avec réserves) |
 | Code mort du dashboard | `kpis.js` (521 lignes) n'était chargé par aucune page après la fusion | supprimé le 11/11 ; la vue producteur zéro-texte vit dans l'onglet « Lecture terrain » d'`app.js` |
 
 ## 5. Recette des 8 critères du CDC §17
@@ -226,10 +226,10 @@ liste explicitement le livré et le non-livré, sans quoi il laisserait croire �
 incrément complet.
 
 - `v2` et `v3` : incréments des Sprints 2 et 3, tous deux partiels.
-- `v-final` : état démontré du Sprint 4 — backend complet (92 tests), dashboard
-  connexion + CRUD + graphiques + toasts + vue terrain (14 tests), simulateur et
-  store-and-forward testés, firmware écrit mais non flashé ; sans prix v2 et
-  sans IA entraînée.
+- `v-final` : état démontré du Sprint 4 — backend complet (95 tests), dashboard
+  connexion + CRUD + graphiques + toasts + vue terrain (17 tests), simulateur et
+  store-and-forward testés, démonstration de bout en bout verte, firmware écrit
+  mais non flashé ; sans prix v2 et sans IA entraînée.
 - Le tag est poussé avec `main` (`git push origin main --follow-tags`), recréé
   sur le commit de livraison du bloc C.
 

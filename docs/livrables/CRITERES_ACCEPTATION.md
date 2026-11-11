@@ -23,7 +23,7 @@ leur reste-à-faire est explicite : aucune promesse au-delà de ce qui tourne.
 | 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | Dashboard branché sur `/api/v1/kpis` et `/prices/forecast`, 17 tests JS, `test_kpis.py` |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py` |
 | 7 | Chaque action de gestion affiche un toast | ✅ | `dashboard/js/toast.js` + appels `showToast` après chaque CRUD (`app.js`) |
-| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 2 PR (#25, fusion du dashboard) ; 40 des 45 commits de `main` sont du SM ; Mounpain : 2 commits sur `sahoda`, non fusionnés |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 2 PR (#25, fusion du dashboard) ; 40 des 45 commits de `main` sont du SM ; Mounpain : 2 commits sur `sahoda`, fusionnés le 11/11 (`06e5d66`) |
 
 Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · ❌ non couvert.
 
@@ -138,8 +138,9 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
   11/11 avec 2 commits sur `simulator/` (générateur, scénarios, Store-and-Forward).
 - Conséquence : l'historique ne montre pas le travail de chaque membre. Il est
   correct pour Mourad et Patrick (branches dédiées), partiel pour le bloc C :
-  `sahoda` couvre #6 et #12 mais n'a ni test, ni firmware (#19), et n'est pas
-  fusionnée (base de 29 commits en retard, 3 fichiers en conflit).
+  `sahoda` couvre #6 et #12 mais n'a ni test ni firmware (#19) ; elle est
+  fusionnée le 11/11 (`06e5d66`) en conservant l'implémentation testée de
+  `main`, la sienne produisant des horodatages futurs et des rejets bloquants.
   L'écart sur le travail direct du SM est assumé (voir `SPRINT_4_REVIEW.md`
   §9.1) et laisse le critère **partiel**.
 - Preuve : `git log --format='%an' | sort | uniq -c`,

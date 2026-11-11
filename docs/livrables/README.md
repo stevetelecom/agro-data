@@ -26,6 +26,7 @@ avec le suivi des actions d'un sprint sur l'autre.
 | Document | Contenu |
 |---|---|
 | [`CRITERES_ACCEPTATION.md`](CRITERES_ACCEPTATION.md) | les 8 critères du CDC §17, leur statut et leur preuve exécutable (tests, routes, commits) |
+| [`PV_RECETTE.md`](PV_RECETTE.md) | procès-verbal de recette du tag `v-final` : preuves, réserves, commandes de démonstration |
 
 ## Versions du dossier
 

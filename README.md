@@ -52,8 +52,9 @@ Le port 8080 est déjà autorisé par le CORS du backend. L'écran de connexion
 indicateurs, mesures, parcelles, appareils, abonnés, vue terrain et journal.
 
 L'adresse de l'API est `http://127.0.0.1:8000` par défaut, réglable dans
-`dashboard/config.js` (versionné), puis par `window.AGRO_API_BASE`, puis par la
-variable `API_BASE_URL` d'un fichier `.env` à la racine (local, non versionné).
+`dashboard/config.js` (versionné, clé `window.AGRO_CONFIG.apiBaseUrl`), puis par
+`window.AGRO_API_BASE`, puis par la variable `API_BASE_URL` d'un fichier `.env`
+à la racine (local, non versionné).
 Connecté à l'API, le tableau de bord affiche les indicateurs et la courbe de prix
 de `GET /api/v1/kpis` et `GET /api/v1/prices/forecast` ; les mêmes formules sont
 recalculées localement en mode démonstration.
