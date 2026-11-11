@@ -365,6 +365,48 @@ table.data tbody tr[aria-selected="true"] { background: #e7f2eb; }
 
 .terrain-tile.tone-eleve { background: var(--danger-bg); color: var(--danger); }
 
+.terrain-signal {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 1.2rem;
+  box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.03);
+}
+
+.terrain-signal .material-symbols-outlined { font-size: 76px; }
+
+.terrain-signal.tone-faible { background: var(--ok); color: #fff; }
+
+.terrain-signal.tone-modere { background: var(--warn); color: #fff; }
+
+.terrain-signal.tone-eleve { background: var(--danger); color: #fff; }
+
+.terrain-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin: 1rem 0 0; }
+
+.terrain-action {
+  min-height: 96px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #fff;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-family: var(--sans);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.terrain-action .material-symbols-outlined { font-size: 40px; color: var(--ok); }
+
+.terrain-action:hover { border-color: var(--ok); }
+
+.terrain-action:focus-visible { outline: 3px solid var(--ok); outline-offset: 3px; }
+
 .legend { display: flex; gap: 1rem; padding: 0; list-style: none; margin: 1rem 0 0; }
 
 .legend li { font-weight: 800; }

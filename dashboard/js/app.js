@@ -361,6 +361,18 @@ function renderTerrain(root) {
     return;
   }
   root.append(el("p", { class: "terrain-name", text: focus.name }));
+  // Feu d'alerte : l'état se lit à la couleur et au pictogramme, sans texte.
+  root.append(
+    el(
+      "div",
+      {
+        class: `terrain-signal tone-${focus.level}`,
+        role: "img",
+        "aria-label": `Niveau d'alerte : ${LEVEL_LABEL[focus.level]}${focus.alert ? ", pulvérisation recommandée" : ""}`,
+      },
+      [icon(focus.alert ? "warning" : "check_circle")],
+    ),
+  );
   root.append(el("section", { class: "terrain-grid" }, [
     terrainTile("water_drop", focus.humidity === null ? "—" : formatNumber(focus.humidity), "Humidité de l'air, en pour cent", humidityTone(focus.humidity)),
     terrainTile("eco", formatNumber(focus.index), `Indice ${LEVEL_LABEL[focus.level]}`, focus.level),
@@ -371,11 +383,45 @@ function renderTerrain(root) {
       focus.alert ? "eleve" : "faible",
     ),
   ]));
+  root.append(
+    el("div", { class: "terrain-actions" }, [
+      terrainAction("volume_up", "Écouter", "Écouter l'alerte à voix haute", () => speakAlert(focus)),
+      terrainAction("call", "Appeler", "Appeler le conseiller agricole", () => {
+        showToast("Conseiller agricole : +237 6 90 00 00 00", "success");
+      }),
+    ]),
+  );
   root.append(el("ul", { class: "legend" }, [
     el("li", { class: "tone-faible", text: "Faible" }),
     el("li", { class: "tone-modere", text: "Modéré" }),
     el("li", { class: "tone-eleve", text: "Élevé" }),
   ]));
+}
+
+/** Gros bouton muet : un pictogramme et un mot, lisible en plein soleil. */
+function terrainAction(symbol, label, ariaLabel, onClick) {
+  const button = el("button", { type: "button", class: "terrain-action", "aria-label": ariaLabel }, [
+    icon(symbol),
+    el("strong", { text: label }),
+  ]);
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+/** Lit l'état de la parcelle à voix haute, pour un utilisateur qui ne lit pas. */
+function speakAlert(focus) {
+  const niveau = LEVEL_LABEL[focus.level] ?? "Inconnu";
+  const phrase = focus.alert
+    ? `Alerte ${niveau}. Parcelle ${focus.name} : humidité ${formatNumber(focus.humidity)} pour cent. Pulvérisation recommandée.`
+    : `Niveau ${niveau}. Parcelle ${focus.name} : humidité ${formatNumber(focus.humidity)} pour cent. Pas d'alerte.`;
+  if (!("speechSynthesis" in window)) {
+    showToast("La lecture vocale n'est pas disponible dans ce navigateur.", "error");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(phrase);
+  utterance.lang = "fr-FR";
+  window.speechSynthesis.speak(utterance);
 }
 
 function terrainTile(symbol, figure, caption, tone) {
