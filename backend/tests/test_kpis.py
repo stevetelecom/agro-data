@@ -127,6 +127,32 @@ def test_mesures_regroupees_par_parcelle(db_session):
     assert kpis["avg_air_humidity_pct"] == pytest.approx(82.0)
 
 
+def test_volume_sain_utilise_le_volume_de_reference(db_session):
+    """Le KPI « volume sain » vaut volume de référence x (1 - indice)."""
+    parcelle = Plot(
+        code="P-VOL",
+        name="Parcelle Volume",
+        village="Ambam",
+        surface_ha=2.0,
+        reference_volume_kg=1000.0,
+    )
+    db_session.add(parcelle)
+    db_session.flush()
+    db_session.add(Device(device_id="AMB-P001", plot_id=parcelle.id))
+    db_session.commit()
+
+    # 48 h au-dessus de 85 % : indice 60, donc 40 % du volume encore sain.
+    _hourly_run(db_session, "AMB-P001", 48, 90.0)
+    kpis = build_kpis(db_session, now=NOW)
+    assert kpis["global_infestation_index"] == 60
+    assert kpis["estimated_healthy_volume_kg"] == pytest.approx(400.0)
+
+
+def test_volume_sain_nul_sans_volume_de_reference(db_session):
+    _hourly_run(db_session, "SIM-001", 48, 90.0)
+    assert build_kpis(db_session, now=NOW)["estimated_healthy_volume_kg"] == 0.0
+
+
 def test_appareil_non_rattache_forme_sa_propre_serie(db_session):
     _add_measurement(db_session, "SIM-001", NOW - 3600, 78.0)
     db_session.commit()

@@ -79,6 +79,8 @@ export function adaptApiWorkspace(payload) {
       code: raw.code || "",
       name: raw.name || raw.code || "Parcelle",
       sector: raw.sector || raw.location_label || "",
+      village: raw.village || "",
+      surface_ha: Number(raw.surface_ha ?? 0),
       device_id: raw.device_id || linked?.device_id || "",
       reference_volume_kg: Number(raw.reference_volume_kg ?? 0),
     };
@@ -129,13 +131,16 @@ async function request(path, options = {}) {
   return payload;
 }
 
+/** Nombre de mesures demandées : au-delà, la série serait tronquée sans le dire. */
+export const MEASUREMENT_FETCH_LIMIT = 2000;
+
 export async function loadWorkspace() {
   if (isDemo()) return loadDemoDb();
   const [plots, devices, subscribers, measurements] = await Promise.all([
     request("/api/v1/plots"),
     request("/api/v1/devices"),
     request("/api/v1/subscribers"),
-    request("/api/v1/measurements"),
+    request(`/api/v1/measurements?limit=${MEASUREMENT_FETCH_LIMIT}`),
   ]);
   return adaptApiWorkspace({
     plots: unwrap(plots),
@@ -143,6 +148,39 @@ export async function loadWorkspace() {
     subscribers: unwrap(subscribers),
     measurements: unwrap(measurements),
   });
+}
+
+/**
+ * Aligne la courbe de prix de l'API (contrat §4.5) sur le modèle des graphiques.
+ * @param {object} payload réponse de GET /api/v1/prices/forecast
+ */
+export function adaptPriceForecast(payload) {
+  const points = Array.isArray(payload?.points) ? payload.points : [];
+  return {
+    unit: payload?.unit || "FCFA/kg",
+    formulaVersion: payload?.formula_version || "",
+    isDemo: Boolean(payload?.is_demo),
+    points: points.map((point) => ({
+      date: String(point.date ?? ""),
+      reference: Number(point.reference_price),
+      priceFcfaKg: Number(point.adjusted_price),
+    })),
+  };
+}
+
+/**
+ * Indicateurs du serveur : KPIs (contrat §4.4) et courbe de prix (§4.5).
+ * Renvoie null en mode démonstration, où le dashboard calcule localement.
+ * @param {{days?: number, plotId?: string}} options
+ */
+export async function loadIndicators({ days = 7, plotId = "all" } = {}) {
+  if (isDemo()) return null;
+  const plotQuery = plotId && plotId !== "all" ? `&plot_id=${encodeURIComponent(plotId)}` : "";
+  const [kpis, forecast] = await Promise.all([
+    request(`/api/v1/kpis?days=${days}${plotQuery}`),
+    request(`/api/v1/prices/forecast?days=${days}`),
+  ]);
+  return { kpis, forecast: adaptPriceForecast(forecast) };
 }
 
 function fieldErrors(payload) {
@@ -164,17 +202,19 @@ function fieldErrors(payload) {
 }
 
 /**
- * Contrôle une parcelle avant envoi.
+ * Contrôle une parcelle avant envoi (contrat §4.6 : village et surface_ha obligatoires).
  * @param {object} input
  * @param {{plots?: object[]}} db
  * @param {string | null} currentId
- * @returns {{errors: object, value: {code: string, name: string, location_label: string}}}
  */
 export function validatePlot(input, db, currentId) {
   const errors = {};
   const code = clean(input.code, 64).toUpperCase();
   const name = clean(input.name, 255);
   const location = clean(input.location_label ?? input.sector, 255);
+  const village = clean(input.village, 40);
+  const surfaceHa = Number(String(input.surface_ha ?? "").replace(",", "."));
+  const volumeKg = Number(String(input.reference_volume_kg ?? 0).replace(",", "."));
   if (!/^[A-Z0-9][A-Z0-9-]{1,31}$/.test(code)) {
     errors.code = "Code de 2 à 32 caractères : lettres, chiffres et tirets.";
   } else if ((db?.plots || []).some((plot) => plot.code === code && plot.id !== currentId)) {
@@ -182,7 +222,24 @@ export function validatePlot(input, db, currentId) {
   }
   if (name.length < 2) errors.name = "Indiquez un nom d'au moins 2 caractères.";
   if (location.length < 2) errors.location_label = "Indiquez le secteur de la parcelle.";
-  return { errors, value: { code, name, location_label: location } };
+  if (village.length < 1) errors.village = "Indiquez le village de la parcelle.";
+  if (!Number.isFinite(surfaceHa) || surfaceHa <= 0) {
+    errors.surface_ha = "Indiquez une surface en hectares supérieure à 0.";
+  }
+  if (!Number.isFinite(volumeKg) || volumeKg < 0) {
+    errors.reference_volume_kg = "Indiquez un volume de référence positif ou zéro.";
+  }
+  return {
+    errors,
+    value: {
+      code,
+      name,
+      location_label: location,
+      village,
+      surface_ha: Math.round(surfaceHa * 10) / 10,
+      reference_volume_kg: Math.round(volumeKg),
+    },
+  };
 }
 
 /**
@@ -229,7 +286,13 @@ export function validateSubscriber(input, db, currentId) {
 }
 
 function toPlotBody(value, update) {
-  const body = { name: value.name, location_label: value.location_label };
+  const body = {
+    name: value.name,
+    location_label: value.location_label,
+    village: value.village,
+    surface_ha: value.surface_ha,
+    reference_volume_kg: value.reference_volume_kg,
+  };
   if (!update) body.code = value.code;
   return body;
 }
@@ -256,8 +319,10 @@ function rememberPlot(value, id) {
     code: value.code,
     name: value.name,
     sector: value.location_label,
+    village: value.village,
+    surface_ha: value.surface_ha,
     device_id: "",
-    reference_volume_kg: 0,
+    reference_volume_kg: value.reference_volume_kg,
   };
 }
 
@@ -310,7 +375,9 @@ export async function updatePlot(id, input, db) {
     const stored = rejectIfInvalid(validatePlot(input, live, id));
     const plot = live.plots.find((item) => item.id === id);
     if (!plot) throw new ApiError("Parcelle introuvable.");
-    Object.assign(plot, rememberPlot(stored, id));
+    // Le boîtier rattaché ne fait pas partie du formulaire : on le conserve.
+    const deviceId = plot.device_id;
+    Object.assign(plot, rememberPlot(stored, id), { device_id: deviceId });
   });
   return null;
 }

@@ -15,6 +15,9 @@ class PlotCreate(BaseModel):
                 "code": "P-001",
                 "name": "Parcelle Ambam Nord",
                 "location_label": "Ambam",
+                "village": "Ambam centre",
+                "surface_ha": 1.5,
+                "reference_volume_kg": 1200,
             }
         }
     )
@@ -22,11 +25,18 @@ class PlotCreate(BaseModel):
     code: str = Field(..., min_length=1, max_length=64)
     name: str = Field(..., min_length=1, max_length=255)
     location_label: str = Field(default="", max_length=255)
+    # Contrat §4.6 : village obligatoire (1 à 40 caractères), surface > 0.
+    village: str = Field(..., min_length=1, max_length=40)
+    surface_ha: float = Field(..., gt=0, le=1000)
+    reference_volume_kg: float = Field(default=0.0, ge=0, le=1_000_000)
 
 
 class PlotUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     location_label: str | None = Field(default=None, max_length=255)
+    village: str | None = Field(default=None, min_length=1, max_length=40)
+    surface_ha: float | None = Field(default=None, gt=0, le=1000)
+    reference_volume_kg: float | None = Field(default=None, ge=0, le=1_000_000)
 
 
 class PlotRead(BaseModel):
@@ -34,6 +44,9 @@ class PlotRead(BaseModel):
     code: str
     name: str
     location_label: str
+    village: str
+    surface_ha: float
+    reference_volume_kg: float
 
     model_config = ConfigDict(from_attributes=True)
 

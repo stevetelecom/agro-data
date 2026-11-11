@@ -35,7 +35,14 @@ def create_plot(
 ) -> Plot:
     if db.query(Plot).filter(Plot.code == body.code).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Code parcelle déjà utilisé")
-    row = Plot(code=body.code, name=body.name, location_label=body.location_label)
+    row = Plot(
+        code=body.code,
+        name=body.name,
+        location_label=body.location_label,
+        village=body.village,
+        surface_ha=body.surface_ha,
+        reference_volume_kg=body.reference_volume_kg,
+    )
     db.add(row)
     db.commit()
     db.refresh(row)

@@ -188,6 +188,13 @@ def build_kpis(
 
     index_global = aggregate_index([groupe.index for groupe in groupes])
     humidite_moyenne = _mean([row.air_humidity_pct for row in rows])
+    # Volume encore commercialisable : volume de référence de chaque parcelle
+    # diminué de son indice d'infestation. Les boîtiers non rattachés à une
+    # parcelle (plot_id = 0) n'ont pas de volume de référence connu.
+    volumes = {plot.id: plot.reference_volume_kg for plot in db.query(Plot).all()}
+    volume_sain_kg = sum(
+        volumes.get(groupe.plot_id, 0.0) * (1 - groupe.index / 100) for groupe in groupes
+    )
 
     rows_precedents = _query_rows(db, debut - days * SECONDS_PER_DAY, debut, plot_id)
     if rows_precedents:
@@ -205,6 +212,7 @@ def build_kpis(
         "avg_air_humidity_pct": round(humidite_moyenne, 1),
         "humidity_delta_7d": round(delta_humidite, 1),
         "estimated_healthy_volume_pct": estimated_healthy_volume_pct(index_global),
+        "estimated_healthy_volume_kg": round(volume_sain_kg, 1),
         "plots_monitored": len(groupes),
         "generated_at": datetime.fromtimestamp(fin, tz=timezone.utc)
         .isoformat()

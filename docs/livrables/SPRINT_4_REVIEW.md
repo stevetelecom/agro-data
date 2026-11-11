@@ -38,7 +38,7 @@ flashé, faute de boîtier : c'est la seule réserve matérielle de la démo.
 
 | Issue | Tâche | Assigné | Statut en fin de sprint |
 |---|---|---|---|
-| #18 | CRUD parcelles/appareils/abonnés, API REST, rate limiting | Mourad | 🟡 Livré et fusionné ; champs `village` / `surface_ha` manquants |
+| #18 | CRUD parcelles/appareils/abonnés, API REST, rate limiting | Mourad | ✅ Livré et fusionné ; `village`, `surface_ha` et `reference_volume_kg` ajoutés le 11/11 |
 | #19 | Intégration finale simulateur/boîtier, câblage | Mounpain | 🟡 Non livré par son titulaire, repris par le SM le 11/11 : simulateur, tampon et firmware écrits ; firmware non flashé |
 | #20 | Intégration E2E, bascule IA, prix v2, tag `v-final` | Olivier (SM) | 🟡 E2E complète avec le simulateur, tag créé, prix v2 non fait |
 | #21 | Finition visuelle, accessibilité, responsive | Olivier (SM) | 🟡 Technique fait, revue de design non validée par le PO |
@@ -84,9 +84,10 @@ Il est désormais dans `main` (commit de fusion `6d6e337`) :
 
 ### 3.3 Bloc C — simulateur, Store-and-Forward, firmware (repris par le SM)
 
-Aucun commit de Mounpain (73EGA) n'étant arrivé, le SM a écrit le bloc entier le
-11/11 pour que la démonstration ait un producteur de messages et une preuve de
-reprise après coupure :
+Rien de Mounpain (73EGA) n'étant arrivé dans `main` à la revue, le SM a écrit le
+bloc entier le 11/11 pour que la démonstration ait un producteur de messages et
+une preuve de reprise après coupure. Deux commits de son auteure ont été poussés
+sur `sahoda` après la revue (voir §9.4) ; ils ne sont pas fusionnés :
 
 - `simulator/generator.py` : message conforme au contrat §3 (horodatage Unix en
   secondes, `climate` / `diagnostic_ia` imbriqués, `geo_enc`), série horaire,
@@ -123,13 +124,13 @@ persistées, tampon vidé, aucun doublon.
 
 | Ticket | Raison | Conséquence sur la démo |
 |---|---|---|
-| #6 simulateur | Livré par le SM le 11/11 (titulaire : 0 commit) | étape 1 de la démo assurée par `python -m simulator` |
+| #6 simulateur | Livré par le SM le 11/11 ; titulaire : 2 commits tardifs sur `sahoda`, non fusionnés | étape 1 de la démo assurée par `python -m simulator` |
 | #12 store-and-forward | Livré par le SM le 11/11, testé contre l'API | critère §17.2 désormais couvert |
 | #19 boîtier | Écrit par le SM, **non compilé ni flashé** | pas de démonstration matérielle, seulement le simulateur |
-| #18 correctif | Branche de Mourad repoussée à l'identique de `main` (0 commit devant) | `village` / `surface_ha` absents du CRUD |
+| #18 correctif | Branche de Mourad repoussée à l'identique de `main` (0 commit devant), correctif fait par le SM | `village` / `surface_ha` / `reference_volume_kg` désormais exposés par `/api/v1/plots` |
 | #20 prix v2 | Non spécifié, non implémenté | seul `formula_version = v1` est exposé |
 | #23 PV de recette | PO indisponible | recette non signée |
-| Vue producteur zéro-texte | `kpis.js` n'est plus chargé par aucune page après la fusion | l'ancienne page `app.html` a été remplacée ; la vue subsiste en code seulement |
+| Code mort du dashboard | `kpis.js` (521 lignes) n'était chargé par aucune page après la fusion | supprimé le 11/11 ; la vue producteur zéro-texte vit dans l'onglet « Lecture terrain » d'`app.js` |
 
 ## 5. Recette des 8 critères du CDC §17
 
@@ -139,10 +140,10 @@ persistées, tampon vidé, aucun doublon.
 | 2 | Une coupure réseau ne perd aucune mesure | ✅ | `test_simulator.py` (5 tests du tampon + rejeu API) ; 24 h hors ligne renvoyées sans doublon |
 | 3 | Plus de 48 h au-dessus de 85 % déclenche une alerte | ✅ | `test_infestation.py`, `test_kpis.py`, routes `/kpis` |
 | 4 | Le prototype IA renvoie un drapeau et un score | 🟡 | route livrée, `is_demo: true`, modèle non entraîné, `ai/dataset` vide |
-| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | dashboard fusionné + 14 tests JS + `test_kpis.py` |
+| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | dashboard branché sur `/kpis` et `/prices/forecast` + 17 tests JS + `test_kpis.py` |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py`, `device_id` contraint |
 | 7 | Chaque action de gestion affiche un toast | ✅ | `toast.js` branché sur chaque CRUD (`app.js`) |
-| 8 | L'historique Git montre le travail de chaque membre | 🟡 | voir §9 : 2 apports extérieurs, 40 des 45 commits du SM, Mounpain 0 |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | voir §9 : 3 apports extérieurs, 40 des 45 commits de `main` du SM, Mounpain 2 commits sur `sahoda` |
 
 Bilan : **6 validés**, **2 partiels**, **0 non couvert**. Les critères 5 et 7,
 annoncés non couverts le 10/11, sont couverts depuis la fusion du dashboard ; le
@@ -171,7 +172,7 @@ n'a pas été compilé, la démonstration s'appuie sur le simulateur.
 
 | Décision | Qui | Suite |
 |---|---|---|
-| La PR #25 est fusionnée sans les champs `village` / `surface_ha` | SM + Mourad | correctif #18 non poussé par Mourad ; non bloquant pour la démo |
+| La PR #25 est fusionnée sans les champs `village` / `surface_ha` | SM + Mourad | correctif #18 appliqué par le SM le 11/11 (modèle, schémas, migration, formulaire) |
 | La branche du dashboard est fusionnée le jour de l'échéance, sans PR | SM | conflits résolus à la main, tests backend et JS rejoués après fusion |
 | Le diagnostic IA reste un stub déterministe assumé | SM | `is_demo: true` dans la réponse et dans la doc ; aucune précision annoncée |
 | Le bloc C est réécrit par le SM faute de livraison | SM | simulateur, tampon et firmware livrés le 11/11 ; écart de traçabilité consigné en §9.4 |
@@ -207,13 +208,14 @@ n'a pas été compilé, la démonstration s'appuie sur le simulateur.
 3. **Kanban décorrélé du code** : au 10/11, 21 issues étaient ouvertes dont
    plusieurs terminées depuis le Sprint 3 ; les cases n'étaient pas cochées.
    Corrigé les 10 et 11/11.
-4. **Bloc C non livré, puis repris** : Mounpain (73EGA) n'a produit **aucun
-   commit** sur aucune branche ; le simulateur, le store-and-forward et le
-   firmware sont restés des squelettes jusqu'au 11/11. Le SM les a écrits
-   lui-même pour ne pas livrer un critère manquant. Conséquence : le code existe
-   et est testé, mais l'historique n'attribue pas ce travail à son titulaire.
-   Action de rétrospective : exiger un commit par semaine et une PR bloquante
-   avant la revue, plutôt qu'un livrable annoncé à l'oral.
+4. **Bloc C livré hors délai, puis repris** : Mounpain (73EGA) n'a poussé que
+   **2 commits** sur `sahoda`, le 10/11 à 17 h et le 11/11 à 4 h, sans test ni
+   firmware ; le simulateur, le store-and-forward et le firmware sont restés des
+   squelettes dans `main` jusqu'au 11/11. Le SM les a écrits lui-même pour ne pas
+   livrer un critère manquant. Conséquence : le code existe et est testé, mais
+   l'historique n'attribue pas ce travail à son titulaire. Action de
+   rétrospective : exiger un commit par semaine et une PR bloquante avant la
+   revue, plutôt qu'un livrable annoncé à l'oral.
 5. **PO indisponible** : aucune validation formelle depuis le Sprint 2, ce qui
    bloque #4, #7, #17, #21 et #23.
 

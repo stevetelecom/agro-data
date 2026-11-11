@@ -15,9 +15,19 @@ const db = {
 };
 
 test("accepte une parcelle, un appareil et un abonné valides", () => {
-  const plot = validatePlot({ code: "p-est", name: "Parcelle Est", location_label: "Ambam Est" }, db, null);
+  const plot = validatePlot({
+    code: "p-est",
+    name: "Parcelle Est",
+    location_label: "Ambam Est",
+    village: "Ambam",
+    surface_ha: "1,7",
+    reference_volume_kg: "1200",
+  }, db, null);
   assert.deepEqual(plot.errors, {});
   assert.equal(plot.value.code, "P-EST");
+  assert.equal(plot.value.village, "Ambam");
+  assert.equal(plot.value.surface_ha, 1.7);
+  assert.equal(plot.value.reference_volume_kg, 1200);
 
   const device = validateDevice({
     device_id: "amb-p004",
@@ -38,12 +48,18 @@ test("accepte une parcelle, un appareil et un abonné valides", () => {
 });
 
 test("refuse un code, un appareil et un e-mail invalides", () => {
-  const plot = validatePlot({ code: "P", name: "A", location_label: "" }, db, null);
+  const plot = validatePlot({ code: "P", name: "A", location_label: "", village: "", surface_ha: "0" }, db, null);
   assert.match(plot.errors.code, /2 à 32/);
   assert.match(plot.errors.name, /2 caractères/);
   assert.match(plot.errors.location_label, /secteur/);
+  assert.match(plot.errors.village, /village/);
+  assert.match(plot.errors.surface_ha, /hectares/);
 
-  const duplicate = validatePlot({ code: "P-NORD", name: "Autre", location_label: "Ambam" }, db, null);
+  const duplicate = validatePlot(
+    { code: "P-NORD", name: "Autre", location_label: "Ambam", village: "Ambam", surface_ha: "2" },
+    db,
+    null,
+  );
   assert.match(duplicate.errors.code, /déjà utilisé/);
 
   const device = validateDevice({ device_id: "BOITE", label: "X", plot_id: "9", status: "" }, db, null);

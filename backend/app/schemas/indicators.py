@@ -42,6 +42,7 @@ class KpisRead(BaseModel):
                 "avg_air_humidity_pct": 83.0,
                 "humidity_delta_7d": 4.0,
                 "estimated_healthy_volume_pct": 57,
+                "estimated_healthy_volume_kg": 2415.0,
                 "plots_monitored": 4,
                 "generated_at": "2026-11-10T11:00:00Z",
                 "humidity_series": [
@@ -65,6 +66,9 @@ class KpisRead(BaseModel):
     avg_air_humidity_pct: float = Field(..., ge=0, le=100)
     humidity_delta_7d: float
     estimated_healthy_volume_pct: int = Field(..., ge=0, le=100)
+    estimated_healthy_volume_kg: float = Field(
+        ..., ge=0, description="Volume de référence des parcelles encore commercialisable."
+    )
     plots_monitored: int = Field(..., ge=0)
     generated_at: str
     humidity_series: list[HumiditySeries]

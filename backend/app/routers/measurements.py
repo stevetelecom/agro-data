@@ -82,6 +82,7 @@ def list_measurements(
     device_id: str | None = Query(default=None),
     ts_from: int | None = Query(default=None, ge=0),
     ts_to: int | None = Query(default=None, ge=0),
+    limit: int = Query(default=500, ge=1, le=5000, description="Nombre maximum de mesures renvoyées."),
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin", "acheteur")),
 ) -> list[MeasurementRead]:
@@ -93,5 +94,5 @@ def list_measurements(
         query = query.filter(Measurement.timestamp >= ts_from)
     if ts_to is not None:
         query = query.filter(Measurement.timestamp <= ts_to)
-    rows = query.order_by(Measurement.timestamp.desc()).limit(500).all()
+    rows = query.order_by(Measurement.timestamp.desc()).limit(limit).all()
     return [_to_read(row, decrypt=True) for row in rows]

@@ -122,14 +122,28 @@ test("efface une session dont le jeton a expiré", () => {
   assert.equal(sessionStorage.getItem("agro_session"), null);
 });
 
-test("refuse des identifiants de démonstration incorrects", async () => {
+test("annonce un service indisponible quand l'API est injoignable et le compte inconnu", async () => {
   installSessionStorage();
   globalThis.fetch = async () => {
-    throw new Error("offline");
+    throw new TypeError("fetch failed");
   };
   await assert.rejects(
     () => login("admin@agrodata.local", "Mauvais2026!"),
-    /Identifiants refusés/,
+    /indisponible/,
+  );
+  assert.equal(getSession(), null);
+});
+
+test("ne bascule pas en démonstration quand l'API répond une erreur 500", async () => {
+  installSessionStorage();
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 500,
+    json: async () => ({ detail: "Erreur interne" }),
+  });
+  await assert.rejects(
+    () => login("admin@agrodata.local", "Admin2026!"),
+    /HTTP 500/,
   );
   assert.equal(getSession(), null);
 });

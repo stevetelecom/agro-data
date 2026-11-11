@@ -15,7 +15,14 @@ def test_plots_crud_requires_auth(client):
 def test_plots_crud_happy_path(client, auth_headers):
     created = client.post(
         "/api/v1/plots",
-        json={"code": "P-001", "name": "Parcelle Ambam Nord", "location_label": "Ambam"},
+        json={
+            "code": "P-001",
+            "name": "Parcelle Ambam Nord",
+            "location_label": "Ambam",
+            "village": "Ambam centre",
+            "surface_ha": 1.5,
+            "reference_volume_kg": 1200,
+        },
         headers=auth_headers,
     )
     assert created.status_code == 201, created.text
@@ -37,12 +44,35 @@ def test_plots_crud_happy_path(client, auth_headers):
     assert deleted.status_code == 204
 
 
+def test_plot_without_village_or_surface_is_rejected(client, auth_headers):
+    """Contrat §4.6 : village obligatoire et surface_ha strictement positive."""
+    missing = client.post(
+        "/api/v1/plots",
+        json={"code": "P-002", "name": "Sans village"},
+        headers=auth_headers,
+    )
+    assert missing.status_code == 422
+
+    negative = client.post(
+        "/api/v1/plots",
+        json={"code": "P-003", "name": "Surface nulle", "village": "Ambam", "surface_ha": 0},
+        headers=auth_headers,
+    )
+    assert negative.status_code == 422
+
+
 def test_buyer_can_read_but_not_write(client, buyer_headers):
     listed = client.get("/api/v1/plots", headers=buyer_headers)
     assert listed.status_code == 200
     created = client.post(
         "/api/v1/plots",
-        json={"code": "P-FORBIDDEN", "name": "Nope", "location_label": "Ambam"},
+        json={
+            "code": "P-FORBIDDEN",
+            "name": "Nope",
+            "location_label": "Ambam",
+            "village": "Ambam",
+            "surface_ha": 1.0,
+        },
         headers=buyer_headers,
     )
     assert created.status_code == 403
@@ -51,7 +81,13 @@ def test_buyer_can_read_but_not_write(client, buyer_headers):
 def test_devices_and_subscribers_crud(client, auth_headers):
     plot = client.post(
         "/api/v1/plots",
-        json={"code": "P-010", "name": "Plot", "location_label": "Ambam"},
+        json={
+            "code": "P-010",
+            "name": "Plot",
+            "location_label": "Ambam",
+            "village": "Ambam",
+            "surface_ha": 2.0,
+        },
         headers=auth_headers,
     ).json()
 

@@ -114,12 +114,14 @@ après fusion de la branche du dashboard, à confirmer en séance.
 
 ### Ce qui n'a pas marché
 
-- **Bloc C sans aucune ligne de code jusqu'à J-1** : simulateur,
-  store-and-forward et firmware sont restés des squelettes pendant quatre
-  sprints. Mounpain (73EGA) n'a produit **aucun commit** sur aucune branche ; le
-  SM n'a pas escaladé assez tôt (action R3-5 non appliquée). Le SM a fini par
-  écrire le bloc lui-même le 11/11 : le critère §17.2 est désormais couvert et
-  testé, mais l'historique Git n'attribue pas ce travail à son titulaire.
+- **Bloc C sans code jusqu'à J-1** : simulateur, store-and-forward et firmware
+  sont restés des squelettes pendant quatre sprints. Mounpain (73EGA) n'a poussé
+  que **2 commits** sur `sahoda`, à J-1 et le matin de la revue (générateur,
+  scénarios, tampon), sans test ni firmware ; le SM n'a pas escaladé assez tôt
+  (action R3-5 non appliquée). Le SM a fini par écrire le bloc lui-même le 11/11 :
+  le critère §17.2 est couvert et testé, mais l'historique Git n'attribue pas ce
+  travail à son titulaire et sa branche, en retard de 29 commits, entre en
+  conflit sur les trois fichiers du simulateur.
 - **Bloc B livré mais invisible** : le dashboard de Patrick était complet sur
   sa branche, sans PR ouverte. Il a été découvert à J-1 et fusionné le jour de
   l'échéance, avec 11 conflits à résoudre. Une branche poussée n'est pas une

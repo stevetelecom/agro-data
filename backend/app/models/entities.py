@@ -33,6 +33,11 @@ class Plot(Base):
     code: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     location_label: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    # Champs du contrat §4.6 (issue #18) : village et surface cultivée.
+    village: Mapped[str] = mapped_column(String(40), nullable=False, default="")
+    surface_ha: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    # Volume de référence de la parcelle, base du KPI « volume sain » (kg).
+    reference_volume_kg: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     devices: Mapped[list["Device"]] = relationship(back_populates="plot")

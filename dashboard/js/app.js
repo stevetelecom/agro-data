@@ -11,6 +11,7 @@ import {
   deleteDevice,
   deletePlot,
   deleteSubscriber,
+  loadIndicators,
   loadWorkspace,
   resetDemoDb,
   updateDevice,
@@ -22,6 +23,7 @@ import { LEVEL_LABEL, formatDateTime, formatNumber, formatPercent } from "./form
 import { cell, mountGrid } from "./grids.js";
 import {
   HUMIDITY_ALERT,
+  PRICE_FORMULA_VERSION,
   PRICE_REFERENCE_FCFA_KG,
   buildForecast,
   seriesByHour,
@@ -44,6 +46,8 @@ const TITLES = {
 const state = {
   session: null,
   db: null,
+  // Indicateurs du serveur (/api/v1/kpis et /prices/forecast) ; null en démo.
+  indicators: null,
   view: "dashboard",
   plotId: "all",
   search: "",
@@ -108,14 +112,35 @@ function plotFilter() {
   select.value = state.plotId;
   select.addEventListener("change", () => {
     state.plotId = select.value;
-    render();
+    // Les KPIs sont filtrés côté serveur : on les recharge pour la parcelle.
+    reload().catch((error) => showToast(error.message || "Chargement impossible.", "error"));
   });
   return select;
 }
 
+/** Indicateurs du serveur, ou null quand le dashboard calcule en local. */
+function indicators() {
+  return state.indicators;
+}
+
+/** Courbe de prix : celle de l'API si elle est disponible, sinon calcul local. */
+function priceForecast(index, alerts) {
+  const fromApi = indicators()?.forecast?.points;
+  if (Array.isArray(fromApi) && fromApi.length > 0) return fromApi;
+  return buildForecast(index, alerts > 0);
+}
+
 function renderDashboard(root) {
   const summary = summarize(scopedMeasurements(), scopedPlots());
-  const forecast = buildForecast(summary.global.index, summary.global.alerts > 0);
+  const kpis = indicators()?.kpis ?? null;
+  const index = kpis ? kpis.global_infestation_index : summary.global.index;
+  const level = kpis ? kpis.level : summary.global.level;
+  const humidity = kpis ? kpis.avg_air_humidity_pct : summary.global.humidity;
+  const alerts = kpis ? kpis.active_alerts : summary.global.alerts;
+  const healthyKg = kpis ? kpis.estimated_healthy_volume_kg : summary.global.healthyKg;
+  const forecast = priceForecast(index, alerts);
+  const reference = forecast[0]?.reference ?? PRICE_REFERENCE_FCFA_KG;
+  const formula = indicators()?.forecast?.formulaVersion || PRICE_FORMULA_VERSION;
   const alertNames = summary.plots.filter((plot) => plot.alert).map((plot) => plot.name);
   root.append(el("div", { class: "view-head" }, [
     el("p", { class: "lede", text: "Risque d'infestation, humidité et volume de cacao encore sain." }),
@@ -128,18 +153,31 @@ function renderDashboard(root) {
     }));
   }
   root.append(el("section", { class: "kpi-grid" }, [
-    kpi("Indice d'infestation", formatNumber(summary.global.index), LEVEL_LABEL[summary.global.level], summary.global.level),
-    kpi("Humidité moyenne", summary.global.humidity === null ? "—" : `${formatNumber(summary.global.humidity)} %`, "24 dernières heures", humidityTone(summary.global.humidity)),
-    kpi("Alertes actives", formatNumber(summary.global.alerts, 0), "Parcelles au-delà de 48 h", summary.global.alerts > 0 ? "eleve" : "faible"),
-    kpi("Volume sain estimé", `${formatNumber(summary.global.healthyKg, 0)} kg`, "Volume encore commercialisable", "neutral"),
+    kpi("Indice d'infestation", formatNumber(index), LEVEL_LABEL[level], level),
+    kpi("Humidité moyenne", humidity === null ? "—" : `${formatNumber(humidity)} %`, "24 dernières heures", humidityTone(humidity)),
+    kpi("Alertes actives", formatNumber(alerts, 0), "Parcelles au-delà de 48 h", alerts > 0 ? "eleve" : "faible"),
+    kpi(
+      "Volume sain estimé",
+      healthyKg > 0 ? `${formatNumber(healthyKg, 0)} kg` : "—",
+      kpis && healthyKg > 0
+        ? `${formatNumber(kpis.estimated_healthy_volume_pct, 0)} % du volume de référence`
+        : "Renseignez le volume de référence des parcelles",
+      "neutral",
+    ),
   ]));
+  root.append(el("p", {
+    class: "caption",
+    text: kpis
+      ? "Indicateurs fournis par GET /api/v1/kpis."
+      : "Indicateurs calculés localement (mode démonstration, formules RM2/RM3 identiques à l'API).",
+  }));
   const humidityCanvas = el("canvas");
   const indexCanvas = el("canvas");
   const priceCanvas = el("canvas");
   root.append(el("section", { class: "chart-grid" }, [
     chartCard("Humidité de l'air", "Humidité de l'air sur les dernières heures. Le seuil d'alerte est 85 %.", humidityCanvas),
     chartCard("Indice d'infestation", "Risque estimé à partir de l'humidité et des cabosses touchées.", indexCanvas),
-    chartCard("Prix prévisionnel", `Prix indicatif, à partir de ${formatNumber(PRICE_REFERENCE_FCFA_KG, 0)} FCFA/kg, ajusté selon l'indice d'infestation.`, priceCanvas, true),
+    chartCard("Prix prévisionnel", `Prix indicatif, à partir de ${formatNumber(reference, 0)} FCFA/kg, ajusté selon l'indice d'infestation (formule ${formula}).`, priceCanvas, true),
   ]));
   const drawn = renderCharts({
     humidityCanvas,
@@ -282,6 +320,8 @@ function plotRows() {
   return summary.plots.map((plot) => ({
     id: plot.id,
     name: plot.name,
+    village: plot.village || "—",
+    surface_ha: plot.surface_ha,
     sector: plot.sector,
     device_id: plot.device_id,
     hours: plot.hours,
@@ -295,6 +335,8 @@ function plotRows() {
 function plotColumns() {
   return [
     { field: "name", label: "Parcelle", render: (value) => cell(value) },
+    { field: "village", label: "Village", render: (value) => cell(value) },
+    { field: "surface_ha", label: "Surface", type: "number", render: (value) => cell(`${formatNumber(value, 1)} ha`) },
     { field: "sector", label: "Secteur", render: (value) => cell(value) },
     { field: "device_id", label: "Appareil", render: (value) => cell(value) },
     { field: "hours", label: "Heures > 85 %", type: "number", render: (value) => cell(formatNumber(value, 0)) },
@@ -434,7 +476,27 @@ function terrainTile(symbol, figure, caption, tone) {
 
 function renderJournal(root) {
   const summary = summarize(scopedMeasurements(), scopedPlots());
-  const forecast = buildForecast(summary.global.index, summary.global.alerts > 0);
+  const kpis = indicators()?.kpis ?? null;
+  const index = kpis ? kpis.global_infestation_index : summary.global.index;
+  const alerts = kpis ? kpis.active_alerts : summary.global.alerts;
+  const forecast = priceForecast(index, alerts);
+  const reference = forecast[0]?.reference ?? PRICE_REFERENCE_FCFA_KG;
+  const formula = indicators()?.forecast?.formulaVersion || PRICE_FORMULA_VERSION;
+  const hasIndex = forecast.some((point) => Number.isFinite(point.index));
+  const headers = hasIndex
+    ? ["Date", "Indice", "Référence (FCFA/kg)", "Écart", "Prix (FCFA/kg)"]
+    : ["Date", "Référence (FCFA/kg)", "Écart", "Prix (FCFA/kg)"];
+  const rows = forecast.map((point) => {
+    const values = [point.date];
+    if (hasIndex) values.push(point.index === undefined ? "—" : formatNumber(point.index));
+    const gap = point.priceFcfaKg - point.reference;
+    values.push(
+      formatNumber(point.reference, 0),
+      `${gap > 0 ? "+" : ""}${formatNumber(gap, 2)}`,
+      formatNumber(point.priceFcfaKg, 0),
+    );
+    return values;
+  });
   root.append(el("div", { class: "view-head" }, [
     el("p", { class: "lede", text: "Détail des prix prévisionnels proposés aux acheteurs." }),
     plotFilter(),
@@ -456,22 +518,11 @@ function renderJournal(root) {
     el("h2", { text: "Prix prévisionnel" }),
     el("p", {
       class: "caption",
-      text: `Estimation indicative : ${formatNumber(PRICE_REFERENCE_FCFA_KG, 0)} FCFA/kg, ajustée selon l'indice d'infestation.`,
+      text: `Estimation indicative : ${formatNumber(reference, 0)} FCFA/kg, ajustée selon l'indice d'infestation (formule ${formula}). Source : ${
+        indicators()?.forecast ? "GET /api/v1/prices/forecast" : "calcul local, mode démonstration"
+      }.`,
     }),
-    dataTable(
-      ["Date", "Indice", "Référence (FCFA/kg)", "Écart", "Prix (FCFA/kg)"],
-      forecast.map((point) => {
-        const gap = point.priceFcfaKg - point.reference;
-        const signed = `${gap > 0 ? "+" : ""}${formatNumber(gap, 0)}`;
-        return [
-          point.date,
-          formatNumber(point.index),
-          formatNumber(point.reference, 0),
-          signed,
-          formatNumber(point.priceFcfaKg, 0),
-        ];
-      }),
-    ),
+    dataTable(headers, rows),
   ]));
 }
 
@@ -541,7 +592,16 @@ function recordById(kind, id) {
 }
 
 async function reload() {
-  state.db = await loadWorkspace();
+  const db = await loadWorkspace();
+  let fromApi = null;
+  try {
+    fromApi = await loadIndicators({ plotId: state.plotId });
+  } catch (error) {
+    // Les grilles restent utilisables : on retombe sur le calcul local.
+    showToast(error.message || "Indicateurs indisponibles.", "error");
+  }
+  state.db = db;
+  state.indicators = fromApi;
   render();
 }
 
@@ -557,6 +617,9 @@ async function saveEntity(kind, existing) {
         { name: "code", label: "Code", value: existing?.code || "", readOnly: Boolean(existing), hint: "2 à 32 caractères : lettres, chiffres et tirets. Exemple : P-EST." },
         { name: "name", label: "Nom", value: existing?.name || "" },
         { name: "location_label", label: "Secteur", value: existing?.sector || "" },
+        { name: "village", label: "Village", value: existing?.village || "", hint: "Village où se trouve la parcelle." },
+        { name: "surface_ha", label: "Surface (ha)", type: "number", step: "0.1", min: 0.1, value: existing?.surface_ha || "", hint: "Surface cultivée, supérieure à 0." },
+        { name: "reference_volume_kg", label: "Volume de référence (kg)", type: "number", step: "1", min: 0, value: existing?.reference_volume_kg ?? 0, hint: "Production attendue : base du volume sain affiché." },
       ],
       create: createPlot,
       update: updatePlot,
@@ -723,9 +786,10 @@ async function init() {
     onClick(event).catch((error) => showToast(error.message || "Action impossible.", "error"));
   });
   try {
-    state.db = await loadWorkspace();
+    await reload();
   } catch (error) {
     state.db = { version: 1, plots: [], devices: [], subscribers: [], measurements: [] };
+    state.indicators = null;
     showToast(error.message || "Chargement impossible.", "error");
   }
   show("dashboard");

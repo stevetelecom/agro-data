@@ -151,6 +151,7 @@ Alimente les quatre cartes et le graphique d'humidité de l'écran 2 de la maque
   "avg_air_humidity_pct": 83.0,
   "humidity_delta_7d": 4.0,
   "estimated_healthy_volume_pct": 57,
+  "estimated_healthy_volume_kg": 2415.0,
   "plots_monitored": 4,
   "generated_at": "2026-11-10T11:00:00Z",
   "humidity_series": [
@@ -180,6 +181,7 @@ Alimente les quatre cartes et le graphique d'humidité de l'écran 2 de la maque
 | `avg_air_humidity_pct` | réel | humidité de l'air moyenne sur la fenêtre |
 | `humidity_delta_7d` | réel | écart en points avec la moyenne des 7 jours précédents |
 | `estimated_healthy_volume_pct` | entier | `max(20, 100 − 0,7 × indice)` — **hypothèse de démonstration**, à calibrer avec l'ICCO |
+| `estimated_healthy_volume_kg` | réel | somme, par parcelle, de `reference_volume_kg × (1 − indice / 100)` ; 0 pour un boîtier non rattaché |
 | `plots_monitored` | entier | nombre de parcelles suivies |
 | `humidity_series` | tableau | une série de `days` points par parcelle suivie, `under_alert` à `true` si la parcelle est en alerte RM1 |
 
@@ -241,6 +243,7 @@ Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `
 | `name` | chaîne | oui | 1 à 40 caractères, obligatoire |
 | `village` | chaîne | oui | 1 à 40 caractères, obligatoire |
 | `surface_ha` | réel | oui | > 0, pas à 0,1 près |
+| `reference_volume_kg` | réel | oui | ≥ 0, défaut 0 ; base du KPI « volume sain en kg » |
 | `hours_above_85` | entier | **non** | calculé sur les mesures, 0 à 168 |
 | `ia_detection_rate` | réel | **non** | calculé sur les mesures, 0 à 1 |
 | `infestation_index` | entier | non | RM2 |
@@ -341,7 +344,7 @@ Ces points ne bloquent pas le développement, mais doivent être tranchés avant
 | `geo_enc` en clair dans la zone brute | ✅ chiffré AES-256-GCM avant écriture ; le nom de fichier est aussi nettoyé | revue PR #25, point 2, BNF3 |
 | `confidence` obligatoire ou non | garder obligatoire ; le simulateur fournit toujours une valeur | #6 |
 | Unité de `timestamp` | secondes Unix UTC confirmé ; le simulateur doit convertir depuis `datetime` | #6 |
-| Champs de `Plot` | ajouter `village` et `surface_ha` au modèle, à la place de `location_label` | #18, `docs/DESIGN_SYSTEM.md` §8 |
+| Champs de `Plot` | ✅ `village`, `surface_ha` et `reference_volume_kg` ajoutés au modèle le 11/11 (`location_label` conservé comme libellé de secteur) | #18, `docs/DESIGN_SYSTEM.md` §8 |
 | `humidity_series` dans `/kpis` | série agrégée par jour et par parcelle, plutôt qu'un appel `/measurements` par graphique | #13, #16 |
 | Formule du volume sain | `max(20, 100 − 0,7 × indice)` est une hypothèse de démonstration, à calibrer | #13 |
 

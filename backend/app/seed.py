@@ -41,9 +41,23 @@ def ensure_trial_dataset(db: Session) -> None:
         return
     plot = db.query(Plot).filter(Plot.code == "P-NORD").first()
     if plot is None:
-        plot = Plot(code="P-NORD", name="Parcelle Nord", location_label="Ambam Nord")
+        plot = Plot(
+            code="P-NORD",
+            name="Parcelle Nord",
+            location_label="Ambam Nord",
+            village="Ambam",
+            surface_ha=1.5,
+            reference_volume_kg=1200.0,
+        )
         db.add(plot)
         db.flush()
+    # Bases créées avant l'issue #18 : complète les champs de parcelle vides.
+    if not plot.village:
+        plot.village = "Ambam"
+    if not plot.surface_ha:
+        plot.surface_ha = 1.5
+    if not plot.reference_volume_kg:
+        plot.reference_volume_kg = 1200.0
     if db.query(Device).filter(Device.device_id == "AMB-P001").first() is None:
         db.add(Device(device_id="AMB-P001", label="Boîtier Nord", plot_id=plot.id, is_active=True))
     hour = int(time.time())

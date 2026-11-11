@@ -1,17 +1,21 @@
 /**
  * Rôle : règles métier RM1, RM2 et RM3 affichées par le dashboard.
- *        Le calcul suit le cahier des charges tant que le serveur ne fournit
- *        pas encore /api/v1/kpis et /api/v1/prices/forecast.
+ *        Ces calculs ne servent qu'en mode démonstration, sans backend :
+ *        connecté à l'API, le dashboard affiche /api/v1/kpis et
+ *        /api/v1/prices/forecast. Les constantes et la formule RM3 sont donc
+ *        identiques à backend/app/services/pricing.py, pour que les deux
+ *        sources ne divergent jamais.
  * Auteur : NEGOUE Patrick
  * Bloc : B
  */
 
 export const HUMIDITY_ALERT = 85;
 export const ALERT_HOURS = 48;
-export const PRICE_REFERENCE_FCFA_KG = 1500;
-export const PRICE_COEFFICIENT = 0.0035;
-export const PRICE_FORMULA_VERSION = "RM3-demo-1";
-export const INDEX_FORMULA_VERSION = "RM2-demo-1";
+// Alignés sur pricing.py : 1050 FCFA/kg et k = 0,15 (formule v1).
+export const PRICE_REFERENCE_FCFA_KG = 1050;
+export const PRICE_COEFFICIENT = 0.15;
+export const PRICE_FORMULA_VERSION = "v1";
+export const INDEX_FORMULA_VERSION = "RM2-v1";
 
 export function consecutiveHoursAbove(measurements, threshold = HUMIDITY_ALERT) {
   const sorted = [...measurements].sort((a, b) => a.timestamp - b.timestamp);
@@ -47,7 +51,8 @@ export function levelFromIndex(index) {
 }
 
 export function priceFromIndex(index) {
-  return Math.round(PRICE_REFERENCE_FCFA_KG * (1 + PRICE_COEFFICIENT * index));
+  // prix = référence x (1 + k x indice / 100), comme adjust_price() côté API.
+  return Math.round(PRICE_REFERENCE_FCFA_KG * (1 + (PRICE_COEFFICIENT * index) / 100));
 }
 
 export function averageHumidity(measurements, windowHours = 24) {

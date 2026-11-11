@@ -128,6 +128,12 @@ export async function login(email, password) {
   const identity = String(email ?? "").trim().toLowerCase();
   const secret = String(password ?? "");
 
+  // Le repli sur les comptes de démonstration n'est autorisé que si l'API est
+  // réellement injoignable (réseau, timeout). Un refus du serveur (401, 403,
+  // 422, 429, 5xx) ne doit jamais devenir une session de démonstration :
+  // l'utilisateur verrait « identifiants refusés » alors que le service est en
+  // cause, ou entrerait dans le dashboard sans le savoir.
+  let apiUnreachable = false;
   try {
     const response = await fetch(`${await apiBase()}/api/v1/auth/login`, {
       method: "POST",
@@ -135,7 +141,7 @@ export async function login(email, password) {
       body: JSON.stringify({ email: identity, password: secret }),
       signal: AbortSignal.timeout(8000),
     });
-      if (response.status === 401 || response.status === 403 || response.status === 422) {
+    if (response.status === 401 || response.status === 403 || response.status === 422) {
       const payload = await response.json().catch(() => ({}));
       const detail = typeof payload.detail === "string" ? payload.detail : payload.message;
       const rejected = new Error(detail || "Identifiants refusés.");
@@ -162,12 +168,26 @@ export async function login(email, password) {
       });
       return;
     }
+    const refused = new Error(
+      `Le service a refusé la connexion (HTTP ${response.status}). Réessayez dans un instant.`,
+    );
+    refused.serviceResponse = true;
+    throw refused;
   } catch (error) {
-    if (error.loginRejected) throw error;
+    // Toute erreur qui ne vient pas d'une réponse HTTP (réseau, timeout,
+    // CORS, réponse illisible) signifie que l'API n'est pas joignable.
+    if (error.loginRejected || error.serviceResponse) throw error;
+    apiUnreachable = true;
   }
 
   const demo = DEMO_USERS.find((user) => user.email === identity && user.password === secret);
-  if (!demo) throw new Error("Identifiants refusés.");
+  if (!demo) {
+    throw new Error(
+      apiUnreachable
+        ? "Le service est momentanément indisponible. Démarrez l'API, ou connectez-vous avec un compte de démonstration."
+        : "Identifiants refusés.",
+    );
+  }
   saveSession({
     email: demo.email,
     name: demo.name,

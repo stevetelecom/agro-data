@@ -37,22 +37,31 @@ La base SQLite et les comptes de démonstration sont créés au premier démarra
 
 ### Tableau de bord
 
-Servir la **racine** du dépôt avec un serveur statique (le tableau de bord lit les
-modules ES sous `dashboard/js/`) :
+Servir le dossier `dashboard/` avec un serveur statique (les modules ES sont sous
+`dashboard/js/`) :
 
 ```bash
-python -m http.server 8080       # http://127.0.0.1:8080/dashboard/
+python -m http.server 8080 --directory dashboard   # http://127.0.0.1:8080/
 ```
+
+Servir `dashboard/` seul évite d'exposer `backend/` et le fichier `.env` sur le
+port 8080 pendant la démonstration.
 
 Le port 8080 est déjà autorisé par le CORS du backend. L'écran de connexion
 (`dashboard/index.html`) ouvre le tableau de bord complet (`app.html`) :
 indicateurs, mesures, parcelles, appareils, abonnés, vue terrain et journal.
 
-L'adresse de l'API est `http://127.0.0.1:8000` par défaut. Elle se surcharge avec
-la variable `API_BASE_URL` d'un fichier `.env` à la racine (fichier local, non
-versionné) ou avec `window.AGRO_API_BASE`. Si l'API est injoignable, l'écran de
-connexion bascule sur une session de démonstration et l'indique clairement ;
-une erreur d'identifiants n'entraîne jamais ce basculement.
+L'adresse de l'API est `http://127.0.0.1:8000` par défaut, réglable dans
+`dashboard/config.js` (versionné), puis par `window.AGRO_API_BASE`, puis par la
+variable `API_BASE_URL` d'un fichier `.env` à la racine (local, non versionné).
+Connecté à l'API, le tableau de bord affiche les indicateurs et la courbe de prix
+de `GET /api/v1/kpis` et `GET /api/v1/prices/forecast` ; les mêmes formules sont
+recalculées localement en mode démonstration.
+
+Si l'API est injoignable (réseau, timeout), l'écran de connexion bascule sur une
+session de démonstration et l'indique clairement. Un refus du serveur (401, 403,
+422, 429, 5xx) ne bascule jamais en démonstration : le message distingue des
+identifiants refusés d'un service indisponible.
 
 ### Comptes de démonstration
 

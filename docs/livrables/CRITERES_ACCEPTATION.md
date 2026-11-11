@@ -20,10 +20,10 @@ leur reste-à-faire est explicite : aucune promesse au-delà de ce qui tourne.
 | 2 | Une coupure réseau ne perd aucune mesure | ✅ | `test_simulator.py::test_reprise_apres_coupure_envoie_tout_une_seule_fois` + démonstration CLI réelle (24 h hors ligne, 24 renvoyées, 0 doublon) |
 | 3 | Plus de 48 h > 85 % déclenche une alerte | ✅ | `test_kpis.py` (alerte à 48 h, pas avant 47 h) |
 | 4 | Le prototype IA retourne un drapeau et un score | 🟡 | `test_diagnostic.py`, `ai/infer.py` (stub, `is_demo: true`) |
-| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | `dashboard/index.html` + `app.js` + `grids.js`, 14 tests JS, `test_kpis.py` |
+| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | Dashboard branché sur `/api/v1/kpis` et `/prices/forecast`, 17 tests JS, `test_kpis.py` |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py` |
 | 7 | Chaque action de gestion affiche un toast | ✅ | `dashboard/js/toast.js` + appels `showToast` après chaque CRUD (`app.js`) |
-| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 2 PR (#25, fusion du dashboard) ; 37 des 42 commits sont du SM, Mounpain : 0 |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 2 PR (#25, fusion du dashboard) ; 40 des 45 commits de `main` sont du SM ; Mounpain : 2 commits sur `sahoda`, non fusionnés |
 
 Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · ❌ non couvert.
 
@@ -87,11 +87,20 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
   `api.js`, `app.js`, `grids.js`, `charts.js`, `metrics.js`) affiche les cartes
   d'indicateurs, les graphiques Chart.js et les grilles jQWidgets des mesures,
   parcelles, appareils, abonnés et journal.
+- **Les indicateurs viennent du serveur** : connecté à l'API, `loadIndicators()`
+  appelle `GET /api/v1/kpis` (indice, niveau, alertes, humidité, volume sain en kg)
+  et `GET /api/v1/prices/forecast` (courbe de prix, formule v1). Le filtre par
+  parcelle recharge les KPIs avec `plot_id`. En mode démonstration seulement, le
+  dashboard recalcule localement — avec les mêmes constantes (1050 FCFA/kg,
+  k = 0,15) et la même formule RM2/RM3 que le backend.
 - Les mêmes données restent accessibles par l'API avec le jeton de l'acheteur :
-  `GET /api/v1/kpis`, `/measurements`, `/plots`, `/devices`, `/subscribers`.
-- Preuves : **14 tests JS** (`node --test js/*.test.js`), `backend/tests/test_kpis.py`,
-  et vérification par appels API sur une base neuve (8 mesures et une parcelle
-  créées au démarrage, connexion `acheteur@ebolowa.cm` → HTTP 200).
+  `GET /api/v1/kpis`, `/prices/forecast`, `/measurements`, `/plots`, `/devices`,
+  `/subscribers`.
+- Preuves : **17 tests JS** (`node --test js/*.test.js`), dont l'égalité de la
+  formule de prix et l'adaptation de la courbe §4.5 ; `backend/tests/test_kpis.py`
+  (dont `estimated_healthy_volume_kg`) ; vérification par appels API sur une base
+  neuve (8 mesures et une parcelle créées au démarrage, connexion
+  `acheteur@ebolowa.cm` → HTTP 200).
 - Limite assumée : le parcours navigateur complet n'a pas été rejoué le 11/11 ;
   la validation visuelle reste à faire pendant la démonstration.
 
@@ -123,13 +132,14 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
 
 - 24 issues réparties par module (A1-A6, B1-B2, C1-C2, G1), milestones Sprint 2
   à 4, Kanban public : la répartition du **travail prévu** est tracée.
-- Deux apports extérieurs sont visibles dans l'historique : la PR #25 (backend
-  de Mourad, 2 commits) et la fusion du dashboard de NTPbreak le 11/11
-  (3 commits, `6d6e337`). Les autres commits sont du SM, directement sur
-  `main` : le bloc simulateur/boîtier (Mounpain, 73EGA) n'a produit aucun commit
-  sur aucune branche et a dû être repris par le SM (issues #6, #12, #19).
+- Trois apports extérieurs sont visibles dans l'historique : la PR #25 (backend
+  de Mourad, 2 commits), la fusion du dashboard de NTPbreak le 11/11
+  (3 commits, `6d6e337`) et la branche `sahoda` de Mounpain (73EGA), poussée le
+  11/11 avec 2 commits sur `simulator/` (générateur, scénarios, Store-and-Forward).
 - Conséquence : l'historique ne montre pas le travail de chaque membre. Il est
-  correct pour Mourad et Patrick (branches dédiées), incomplet pour le bloc C.
+  correct pour Mourad et Patrick (branches dédiées), partiel pour le bloc C :
+  `sahoda` couvre #6 et #12 mais n'a ni test, ni firmware (#19), et n'est pas
+  fusionnée (base de 29 commits en retard, 3 fichiers en conflit).
   L'écart sur le travail direct du SM est assumé (voir `SPRINT_4_REVIEW.md`
   §9.1) et laisse le critère **partiel**.
 - Preuve : `git log --format='%an' | sort | uniq -c`,
@@ -141,9 +151,9 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
 ## Comment rejouer les preuves
 
 ```bash
-cd backend && pytest -q                 # 92 tests, dont test_e2e.py et test_simulator.py
+cd backend && pytest -q                 # 95 tests, dont test_e2e.py et test_simulator.py
 python scripts/demo_e2e.py              # backend démarré : parcours complet
-cd dashboard && node --test js/*.test.js  # 14 tests des modules du dashboard
+cd dashboard && node --test js/*.test.js  # 17 tests des modules du dashboard
 ```
 
 ---
@@ -170,4 +180,5 @@ cd dashboard && node --test js/*.test.js  # 14 tests des modules du dashboard
    (`firmware/agro_node/agro_node.ino`) n'a été ni compilé ni flashé faute de
    boîtier. Seul le simulateur, qui suit le même contrat et la même logique de
    tampon, a été exécuté.
-3. Les champs `village` et `surface_ha` des parcelles : écart #18 non corrigé.
+3. Un prix de référence calibré : 1050 FCFA/kg et k = 0,15 restent des
+   hypothèses de démonstration (formule v1), à confronter aux séries ICCO/CICC.

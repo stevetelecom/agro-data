@@ -114,7 +114,7 @@ Grille : `gap: 16px` ; KPI `repeat(auto-fit, minmax(210px, 1fr))` ; graphiques `
 
 Navigation : 5 entrées maximum, dont 4 visibles en permanence (CDC ENF-U9). L'entrée active porte une barre `--or` à gauche.
 
-**État d'implémentation** : les écrans 2 et 5 sont codés dans `dashboard/app.html` (issues #15 et #21), avec `dashboard/css/app.css` et `dashboard/js/kpis.js`. L'écran 2 consomme `GET /api/v1/kpis` et `GET /api/v1/prices/forecast` ; chaque appel bascule indépendamment sur un jeu de démonstration conforme au contrat si l'API n'est pas joignable. La courbe de prix est rendue en SVG natif (pas de dépendance externe) avec mention « Courbe de démonstration » tant que `is_demo` vaut `true`. Les écrans 1, 3, 4 et 6 restent à intégrer (#8, #14, #16, #22).
+**État d'implémentation** : les écrans 2 et 5 sont codés dans `dashboard/app.html` (issues #15 et #21), avec `dashboard/css/app.css` et les modules `api.js`, `app.js`, `charts.js`, `grids.js`. L'écran 2 consomme `GET /api/v1/kpis` et `GET /api/v1/prices/forecast` (indice, alertes, humidité, volume sain en kg, courbe de prix) ; hors ligne, le mode démonstration recalcule les mêmes formules localement et l'indique à l'écran. La courbe de prix utilise Chart.js et affiche `formula_version` ainsi que la mention de démonstration quand `is_demo` vaut `true`. Les écrans 1, 3, 4 et 6 restent à intégrer (#8, #14, #16, #22).
 
 ---
 
@@ -156,7 +156,7 @@ Les trois points d'accessibilité sont traités dans `dashboard/css/app.css` (is
 | Écart | Maquette | Backend (PR #25) | Décision proposée |
 |---|---|---|---|
 | Identifiants de démo | `acheteur@ebolowa.cm` / `demo1234` | alignés (commit `d524467`) | ✅ résolu : `acheteur@ebolowa.cm` (admin) et `lecteur@ebolowa.cm` (acheteur), mot de passe `demo1234` |
-| Champs de parcelle | `nom`, `village`, `ha` | `code`, `name`, `location_label` | ajouter `village` et `surface_ha` au modèle `Plot` (#18) |
+| Champs de parcelle | `nom`, `village`, `ha` | `code`, `name`, `location_label` + `village`/`surface_ha` | ✅ résolu le 11/11 : `village` et `surface_ha` ajoutés au modèle `Plot` (#18), `location_label` conservé comme libellé de secteur |
 | Heures > 85 % | saisies dans le formulaire | non stockées | calculées à partir des mesures, en lecture seule (#13) |
 | Taux de détection IA | saisi dans le formulaire | non stocké | calculé à partir des mesures, en lecture seule (#13) |
 | Graphiques | SVG écrits à la main | — | remplacer par Chart.js (#16) |
