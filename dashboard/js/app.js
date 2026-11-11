@@ -735,6 +735,10 @@ async function onClick(event) {
     setMenuOpen(!document.body.classList.contains("nav-open"));
     return;
   }
+  if (action === "theme") {
+    toggleTheme();
+    return;
+  }
   if (action === "logout") {
     logout();
     location.href = "index.html";
@@ -767,6 +771,17 @@ async function onClick(event) {
   } catch (error) {
     showToast(error.message || "Action impossible.", "error");
   }
+}
+
+/**
+ * Bascule clair/sombre comme la maquette : lit le schéma appliqué, puis force
+ * data-theme sur <html>. Les graphiques sont retracés avec les nouveaux jetons.
+ */
+function toggleTheme() {
+  const root = document.documentElement;
+  const dark = getComputedStyle(root).colorScheme === "dark";
+  root.dataset.theme = dark ? "light" : "dark";
+  render();
 }
 
 async function init() {

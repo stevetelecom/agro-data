@@ -48,6 +48,14 @@ Deux déclencheurs, dans cet ordre :
 | `--bord` | `#4A2E22` |
 | `--creme` | `#3A2419` |
 
+Le dashboard applique ces deux déclencheurs (`dashboard/css/app.css`) et le
+bouton `contrast` de l'en-tête (`dashboard/app.html`) bascule `data-theme`.
+Les surfaces dérivées suivent : en-têtes de tableau `#3A2419`, survol de ligne
+`rgba(245, 233, 218, .08)`, fonds de niveau `#23301C` / `#3A2419` / `#4A1F18`,
+textes de niveau `#A7D18C` / `#E0A35E` / `#E9927F`. Les graphiques lisent les
+jetons calculés (`--chart-*`) au rendu, comme la maquette trace ses SVG avec
+`var(--brun)` et `var(--or)`.
+
 ---
 
 ## 2. Typographie
