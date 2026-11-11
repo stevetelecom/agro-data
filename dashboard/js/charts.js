@@ -29,7 +29,7 @@ function baseOptions(yTitle) {
     },
     scales: {
       x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
-      y: { title: { display: true, text: yTitle }, grid: { color: "rgba(28, 25, 21, 0.06)" } },
+      y: { title: { display: true, text: yTitle }, grid: { color: "rgba(43, 26, 18, 0.07)" } },
     },
   };
 }
@@ -42,7 +42,7 @@ export function renderCharts({ humidityCanvas, indexCanvas, priceCanvas, series,
   destroyCharts();
   if (!window.Chart || series.length === 0) return false;
   window.Chart.defaults.font.family = "Poppins, sans-serif";
-  window.Chart.defaults.color = "#5e564c";
+  window.Chart.defaults.color = "#7a5c48";
   const labels = series.map((point) => formatDateTime(point.timestamp));
   charts.push(new window.Chart(humidityCanvas, {
     type: "line",
@@ -52,8 +52,8 @@ export function renderCharts({ humidityCanvas, indexCanvas, priceCanvas, series,
         {
           label: "Humidité de l'air",
           data: series.map((point) => point.humidity),
-          borderColor: "#245743",
-          backgroundColor: "rgba(36, 87, 67, 0.12)",
+          borderColor: "#8b4a2b",
+          backgroundColor: "rgba(139, 74, 43, 0.12)",
           fill: true,
           tension: 0.25,
           pointRadius: 0,
@@ -62,7 +62,7 @@ export function renderCharts({ humidityCanvas, indexCanvas, priceCanvas, series,
         {
           label: "Seuil 85 %",
           data: series.map(() => HUMIDITY_ALERT),
-          borderColor: "#9d2c2c",
+          borderColor: "#a63d2f",
           borderDash: [5, 5],
           pointRadius: 0,
           borderWidth: 1.5,
@@ -78,8 +78,8 @@ export function renderCharts({ humidityCanvas, indexCanvas, priceCanvas, series,
       datasets: [{
         label: "Indice d'infestation",
         data: series.map((point) => point.index),
-        borderColor: "#8c4a2f",
-        backgroundColor: "rgba(140, 74, 47, 0.08)",
+        borderColor: "#c8873a",
+        backgroundColor: "rgba(200, 135, 58, 0.14)",
         fill: true,
         tension: 0.25,
         pointRadius: 0,
@@ -101,8 +101,8 @@ export function renderCharts({ humidityCanvas, indexCanvas, priceCanvas, series,
       datasets: [{
         label: "Prix indicatif (FCFA/kg)",
         data: forecast.map((point) => point.priceFcfaKg),
-        borderColor: "#8a6a32",
-        backgroundColor: "rgba(176, 137, 88, 0.16)",
+        borderColor: "#5a3020",
+        backgroundColor: "rgba(90, 48, 32, 0.1)",
         fill: true,
         tension: 0.2,
         pointRadius: 3,
