@@ -113,7 +113,7 @@ class ClimateProfile:
         _check_range("temperature_mean_c", self.temperature_mean_c, TEMPERATURE_MIN_C, TEMPERATURE_MAX_C)
         _check_range("air_humidity_mean_pct", self.air_humidity_mean_pct, HUMIDITY_MIN_PCT, HUMIDITY_MAX_PCT)
         _check_range("soil_humidity_mean_pct", self.soil_humidity_mean_pct, HUMIDITY_MIN_PCT, HUMIDITY_MAX_PCT)
-        if self.temperature_amplitude_c < 0 or self.air_humidity_amplitude_c < 0:
+        if self.temperature_amplitude_c < 0 or self.air_humidity_amplitude_pct < 0:
             raise ValueError("les amplitudes du cycle diurne ne peuvent pas être négatives")
         if self.soil_air_coupling < 0:
             raise ValueError("soil_air_coupling ne peut pas être négatif")
@@ -352,3 +352,137 @@ def generate_hourly(
         seed=seed,
     )
     return simulator.hourly(start, count)
+
+
+def _post_measurement(api_url: str, api_key: str, payload: str) -> None:
+    """Envoie une mesure à `POST {api_url}/api/v1/measurements`.
+
+    Lève une exception en cas d'erreur HTTP ou réseau : l'appelant
+    (tampon Store-and-Forward) décide alors de conserver le message.
+    """
+    import urllib.request
+
+    request = urllib.request.Request(
+        api_url.rstrip("/") + "/api/v1/measurements",
+        data=payload.encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "X-API-Key": api_key,
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=10) as response:
+        response.read()
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Point d'entrée du simulateur : génère et envoie des mesures au backend.
+
+    Usage::
+
+        python -m simulator.generator --scenario healthy --hours 24 \\
+            --api http://localhost:8000 --api-key SECRET
+
+    Scénarios : `healthy`, `critical` (humidité > 85 % prolongée),
+    `network` (coupure puis rejeu via le tampon Store-and-Forward).
+    `--dry-run` affiche les mesures sur stdout au lieu de les envoyer.
+    """
+    import argparse
+    from datetime import datetime, timezone
+
+    from simulator import scenarios
+    from simulator.store_forward import StoreForward
+
+    parser = argparse.ArgumentParser(
+        prog="simulator.generator",
+        description="Simule le boîtier d'acquisition et envoie les mesures à l'API.",
+    )
+    parser.add_argument(
+        "--scenario",
+        choices=["healthy", "critical", "network"],
+        default="healthy",
+        help="scénario de démonstration (défaut : healthy)",
+    )
+    parser.add_argument(
+        "--hours",
+        type=int,
+        default=24,
+        help="nombre de mesures horaires (défaut : 24)",
+    )
+    parser.add_argument(
+        "--api",
+        default="http://localhost:8000",
+        help="URL de base de l'API (défaut : http://localhost:8000)",
+    )
+    parser.add_argument(
+        "--api-key",
+        default="",
+        help="clé d'API appareil (en-tête X-API-Key)",
+    )
+    parser.add_argument(
+        "--spool",
+        default="simulator/spool.jsonl",
+        help="fichier tampon Store-and-Forward (défaut : simulator/spool.jsonl)",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="graine aléatoire pour des mesures reproductibles",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="affiche les mesures JSON au lieu de les envoyer",
+    )
+    args = parser.parse_args(argv)
+
+    if args.hours < 1:
+        parser.error("--hours doit être supérieur ou égal à 1")
+
+    start = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+
+    def emit(payload: str, status: str = "") -> None:
+        """Affiche ou envoie une mesure sérialisée."""
+        if args.dry_run:
+            print(f"[{status}] {payload}" if status else payload)
+        else:
+            _post_measurement(args.api, args.api_key, payload)
+            print(f"envoyé ({status})" if status else "envoyé")
+
+    if args.scenario == "network":
+        spool = StoreForward(args.spool)
+        offline = max(1, args.hours // 3)
+        online = args.hours - offline
+        events = scenarios.network_outage(
+            start,
+            offline_hours=offline,
+            online_hours=online,
+            spool=spool,
+            send_fn=None if args.dry_run else lambda p: _post_measurement(args.api, args.api_key, p),
+            seed=args.seed,
+        )
+        for status, measurement in events:
+            if status == "live":
+                # Seules les mesures « live » ne sont pas déjà prises en
+                # charge : buffered/replayed/pending_retry passent par le
+                # tampon (send_fn de flush) ou restent en attente.
+                emit(to_json(measurement), status)
+            elif status == "buffered" and args.dry_run:
+                # En dry-run, seul le premier passage affiche le payload :
+                # replayed/pending_retry renverraient les mêmes messages.
+                print(f"[buffered] {to_json(measurement)}")
+            elif args.dry_run:
+                print(f"[{status}]")
+            else:
+                print(status)
+    else:
+        scenario = scenarios.healthy if args.scenario == "healthy" else scenarios.critical_humidity
+        for measurement in scenario(start, args.hours, seed=args.seed):
+            emit(to_json(measurement))
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
