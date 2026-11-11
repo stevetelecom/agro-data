@@ -31,7 +31,10 @@ DEVICE_KEY = os.getenv("DEVICE_API_KEY", "agro-device-demo-key")
 ADMIN_EMAIL = os.getenv("DEMO_ADMIN_EMAIL", "acheteur@ebolowa.cm")
 ADMIN_PASSWORD = os.getenv("DEMO_ADMIN_PASSWORD", "demo1234")
 
-DEVICE_ID = f"DEMO-{uuid.uuid4().hex[:6].upper()}"
+# Le scénario critique doit alimenter la parcelle du jeu d'essai : un boîtier
+# inconnu formerait un second groupe et diviserait l'indice global par deux
+# (moyenne des parcelles), alors que la parcelle démontrée est bien en crise.
+DEVICE_ID = os.getenv("DEMO_DEVICE_ID", "AMB-P001")
 PNG = b"\x89PNG\r\n\x1a\n" + b"cabosse-demo"
 
 
@@ -97,7 +100,13 @@ def main() -> int:
                 "air_humidity_pct": 90.0,
                 "soil_humidity_pct": 61.0,
             },
-            "diagnostic_ia": {"phytophthora_detected": 0, "confidence": 0.9},
+            # Le boîtier embarque l'IA : les 12 dernières heures signalent la
+            # pourriture brune, comme le scénario critique du simulateur. Sans
+            # détection, la formule RM2 plafonne à 60, soit « modéré ».
+            "diagnostic_ia": {
+                "phytophthora_detected": 1 if decalage < 12 else 0,
+                "confidence": 0.61 if decalage < 12 else 0.9,
+            },
             "geo_enc": "lat:2.383,lon:11.283",
         }
         statut, _ = _json(

@@ -62,11 +62,14 @@ def ensure_trial_dataset(db: Session) -> None:
         db.add(Device(device_id="AMB-P001", label="Boîtier Nord", plot_id=plot.id, is_active=True))
     hour = int(time.time())
     hour -= hour % 3600
+    # Historique placé entre 56 h et 49 h avant maintenant : il alimente la
+    # fenêtre glissante de 7 jours sans interrompre une série d'alerte de 48 h
+    # injectée ensuite sur la même parcelle (démonstration de bout en bout).
     for index in range(8):
         db.add(
             Measurement(
                 device_id="AMB-P001",
-                timestamp=hour - (7 - index) * 3600,
+                timestamp=hour - (7 - index) * 3600 - 49 * 3600,
                 temperature_c=26.5,
                 air_humidity_pct=round(78 + index * 1.4, 1),
                 soil_humidity_pct=60.0,
