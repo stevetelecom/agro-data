@@ -29,6 +29,10 @@ ai/dataset/*
 ai/model/*
 !ai/model/.gitkeep
 
+# Tampon local du simulateur (Store-and-Forward)
+simulator/buffer.jsonl
+simulator/*.jsonl.tmp
+
 # Système et éditeurs
 .DS_Store
 Thumbs.db

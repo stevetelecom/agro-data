@@ -17,7 +17,7 @@ leur reste-à-faire est explicite : aucune promesse au-delà de ce qui tourne.
 | # | Critère | Statut | Preuve principale |
 |---|---|---|---|
 | 1 | Un message JSON conforme arrive dans le Data Lake | ✅ | `test_e2e.py::test_scenario_complet_de_demonstration` |
-| 2 | Une coupure réseau ne perd aucune mesure | ❌ | dépend de #12 (Store-and-Forward), non implémenté |
+| 2 | Une coupure réseau ne perd aucune mesure | ✅ | `test_simulator.py::test_reprise_apres_coupure_envoie_tout_une_seule_fois` + démonstration CLI réelle (24 h hors ligne, 24 renvoyées, 0 doublon) |
 | 3 | Plus de 48 h > 85 % déclenche une alerte | ✅ | `test_kpis.py` (alerte à 48 h, pas avant 47 h) |
 | 4 | Le prototype IA retourne un drapeau et un score | 🟡 | `test_diagnostic.py`, `ai/infer.py` (stub, `is_demo: true`) |
 | 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | `dashboard/index.html` + `app.js` + `grids.js`, 14 tests JS, `test_kpis.py` |
@@ -40,17 +40,24 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
   coordonnée `geo_enc` n'apparaît en clair (chiffrement AES-256-GCM).
 - Preuve : `backend/tests/test_e2e.py`, commit `54c7e79` (README) et `689c038`
   (chiffrement de la zone brute).
-- Réserve : le simulateur dédié (#6) n'est pas livré ; le test joue son rôle en
-  générant des messages conformes. La démonstration peut s'appuyer sur
-  `backend/tests/test_e2e.py` ou sur un script `curl`.
+- Complément : le simulateur (issue #6, `simulator/generator.py`) produit les
+  mêmes messages par la commande `python -m simulator --scenario sain`. Le test
+  E2E n'est donc plus la seule source de messages conformes.
 
-### 2. Une coupure réseau ne fait perdre aucune mesure — ❌
+### 2. Une coupure réseau ne fait perdre aucune mesure — ✅
 
-- Le tampon Store-and-Forward est l'issue #12 (`simulator/store_forward.py`),
-  encore à l'état d'ébauche. Aucun test ne peut donc prouver la reprise.
-- Décision : ne pas cocher. La démonstration du 11/11 présente ce point comme
-  une limite assumée du prototype, avec le plan de reprise documenté dans
-  `docs/PLAN_DE_CODAGE.md`.
+- Tampon local `simulator/store_forward.py` (issue #12) : une mesure par ligne
+  en JSON Lines, réécriture atomique, mesure retirée uniquement après acceptation
+  par l'API, anti-doublon sur `(device_id, timestamp)`.
+- La reprise s'arrête au premier échec temporaire (réseau, 5xx, 429) pour
+  conserver l'ordre chronologique ; un refus définitif `422` (mesure invalide ou
+  déjà persistée) retire la ligne sans bloquer la file.
+- Preuves : `backend/tests/test_simulator.py` (5 tests sur le tampon, dont un
+  rejeu réel contre l'API qui vérifie l'absence de doublon), et une exécution
+  manuelle : 24 mesures écrites hors ligne puis `24 renvoyées, 0 refusées,
+  0 en attente`, tampon vide.
+- Le firmware `firmware/agro_node/agro_node.ino` applique la même logique sur
+  MicroSD, mais n'a pas été compilé ni flashé (voir plus bas).
 
 ### 3. Plus de 48 h au-dessus de 85 % déclenche une alerte — ✅
 
@@ -118,9 +125,9 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
   à 4, Kanban public : la répartition du **travail prévu** est tracée.
 - Deux apports extérieurs sont visibles dans l'historique : la PR #25 (backend
   de Mourad, 2 commits) et la fusion du dashboard de NTPbreak le 11/11
-  (3 commits, `6d6e337`). Les 37 autres commits sont du SM, directement sur
-  `main`, et le bloc simulateur/boîtier (Mounpain, 73EGA) n'a produit aucun
-  commit sur aucune branche.
+  (3 commits, `6d6e337`). Les autres commits sont du SM, directement sur
+  `main` : le bloc simulateur/boîtier (Mounpain, 73EGA) n'a produit aucun commit
+  sur aucune branche et a dû être repris par le SM (issues #6, #12, #19).
 - Conséquence : l'historique ne montre pas le travail de chaque membre. Il est
   correct pour Mourad et Patrick (branches dédiées), incomplet pour le bloc C.
   L'écart sur le travail direct du SM est assumé (voir `SPRINT_4_REVIEW.md`
@@ -134,7 +141,7 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
 ## Comment rejouer les preuves
 
 ```bash
-cd backend && pytest -q                 # 79 tests, dont test_e2e.py
+cd backend && pytest -q                 # 92 tests, dont test_e2e.py et test_simulator.py
 python scripts/demo_e2e.py              # backend démarré : parcours complet
 cd dashboard && node --test js/*.test.js  # 14 tests des modules du dashboard
 ```
@@ -152,11 +159,15 @@ cd dashboard && node --test js/*.test.js  # 14 tests des modules du dashboard
 5. L'acheteur se connecte au dashboard, consulte les indicateurs et les grilles,
    et gère parcelles, appareils et abonnés avec un toast de confirmation
    (critères 5 et 7), sur les mêmes données que l'API.
+6. Un boîtier simulé alimente cette chaîne et survit à une coupure réseau sans
+   perdre de mesure (critères 1, 2 et 3), avec trois scénarios rejouables par
+   `python -m simulator` (voir `simulator/README.md`).
 
 ## Ce qu'elle ne peut pas affirmer
 
-1. La reprise après coupure réseau (critère 2) : non implémentée.
-2. Une précision de détection IA mesurée : le modèle n'est pas entraîné.
-3. Une alimentation par le simulateur ou le boîtier : `generator.py`,
-   `scenarios.py`, `store_forward.py` et le firmware sont encore des squelettes.
-4. Les champs `village` et `surface_ha` des parcelles : écart #18 non corrigé.
+1. Une précision de détection IA mesurée : le modèle n'est pas entraîné.
+2. Un fonctionnement sur le matériel réel : le croquis ESP32-CAM
+   (`firmware/agro_node/agro_node.ino`) n'a été ni compilé ni flashé faute de
+   boîtier. Seul le simulateur, qui suit le même contrat et la même logique de
+   tampon, a été exécuté.
+3. Les champs `village` et `surface_ha` des parcelles : écart #18 non corrigé.

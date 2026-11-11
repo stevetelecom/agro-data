@@ -114,16 +114,17 @@ après fusion de la branche du dashboard, à confirmer en séance.
 
 ### Ce qui n'a pas marché
 
-- **Bloc C sans aucune ligne de code** : simulateur, store-and-forward et
-  firmware sont restés des squelettes pendant quatre sprints. Mounpain (73EGA)
-  n'a produit **aucun commit** sur aucune branche ; le SM n'a pas escaladé
-  assez tôt (action R3-5 non appliquée). C'est la cause du critère §17.2
-  manquant.
+- **Bloc C sans aucune ligne de code jusqu'à J-1** : simulateur,
+  store-and-forward et firmware sont restés des squelettes pendant quatre
+  sprints. Mounpain (73EGA) n'a produit **aucun commit** sur aucune branche ; le
+  SM n'a pas escaladé assez tôt (action R3-5 non appliquée). Le SM a fini par
+  écrire le bloc lui-même le 11/11 : le critère §17.2 est désormais couvert et
+  testé, mais l'historique Git n'attribue pas ce travail à son titulaire.
 - **Bloc B livré mais invisible** : le dashboard de Patrick était complet sur
   sa branche, sans PR ouverte. Il a été découvert à J-1 et fusionné le jour de
   l'échéance, avec 11 conflits à résoudre. Une branche poussée n'est pas une
   livraison.
-- **Travail direct sur `main` assumé par le SM** : 37 des 42 commits y sont
+- **Travail direct sur `main` assumé par le SM** : 40 des 45 commits y sont
   allés directement, sans PR ni revue. Ce n'est pas un oubli mais une pratique
   choisie (seul développeur backend, itérations courtes) ; elle reste un écart
   à la DoD, et le critère §17.8 (historique montrant le travail de chacun) n'est
@@ -149,6 +150,8 @@ après fusion de la branche du dashboard, à confirmer en séance.
 | R4-5 | Découper chaque module en tickets de 2 jours maximum et vérifier l'avancement à mi-sprint, pas à J-1 | SM | prochaine itération |
 | R4-6 | Vérifier chaque branche distante (`git fetch` + comparaison à `main`) avant toute revue : une branche sans PR n'entre jamais dans la livraison par accident | SM | ✅ appliqué le 11/11 |
 | R4-7 | Exiger une PR ouverte au moins 48 h avant l'échéance, même pour un travail jugé terminé | tous | prochaine itération |
+| R4-8 | Remplacer le suivi oral par un point hebdomadaire écrit (commit ou commentaire d'issue) : un bloc sans trace une semaine de suite est escaladé au PO | SM + PO | prochaine itération |
+| R4-9 | Toujours fournir un parcours de test navigateur reproductible (`simulator/README.md`) pour qu'une démonstration ne dépende pas de la mémoire de celui qui l'a écrite | SM | ✅ appliqué le 11/11 |
 
 ---
 
@@ -166,9 +169,11 @@ après fusion de la branche du dashboard, à confirmer en séance.
 | R3-4 démo de secours | S3 | ✅ maquette prête (`maquettes/agro-data-maquette.html`) |
 | R3-5 suppléant par module | S3 | ❌ non appliqué (bloc C sans code) |
 | R4-1 tag `v-final` annoté et partiel | S4 | ✅ recréé le 11/11 sur l'état fusionné (reste à pousser) |
-| R4-2 livrer #6, #12, #8, #22 en PR | S4 | 🟡 #8 et #22 livrés (branche de NTPbreak fusionnée) ; #6 et #12 non livrés |
+| R4-2 livrer #6, #12, #8, #22 en PR | S4 | 🟡 #8 et #22 livrés (branche de NTPbreak fusionnée) ; #6 et #12 livrés le 11/11 par le SM, sans PR |
 | R4-3 aucune case cochée sans preuve | S4 | ✅ appliqué le 10/11 (issue #20 corrigée) |
 | R4-4 validation PO ou absence consignée | S4 | ⏳ 11/11 |
 | R4-5 tickets de 2 jours maximum | S4 | ⏳ prochaine itération |
 | R4-6 vérifier les branches distantes avant revue | S4 | ✅ appliqué le 11/11 (dashboard récupéré) |
 | R4-7 PR ouverte 48 h avant l'échéance | S4 | ⏳ prochaine itération |
+| R4-8 point hebdomadaire écrit, escalade si silence | S5 | ⏳ prochaine itération |
+| R4-9 parcours de test navigateur documenté | S4 | ✅ `simulator/README.md` |

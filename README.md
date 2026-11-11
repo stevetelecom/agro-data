@@ -88,6 +88,21 @@ Avec le backend démarré, le parcours de bout en bout se rejoue en une commande
 python scripts/demo_e2e.py
 ```
 
+### Simulateur du boîtier
+
+Le boîtier est simulé sans dépendance supplémentaire : mesures conformes au
+contrat, scénarios `sain`, `humidite_critique` et `coupure_reseau`, tampon local
+Store-and-Forward.
+
+```bash
+python -m simulator --scenario sain --hours 72 --dry-run
+python -m simulator --scenario humidite_critique --hours 60   # alerte RM1
+python -m simulator --scenario coupure_reseau --buffer /tmp/buffer.jsonl --wait 10
+```
+
+Le parcours complet, du simulateur à l'onglet « Lecture terrain » du navigateur,
+est décrit dans [simulator/README.md](simulator/README.md).
+
 ## API principale
 
 | Méthode | Route | Rôle |
