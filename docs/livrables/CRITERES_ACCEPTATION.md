@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Référence** | `docs/CAHIER_DES_CHARGES.md` §17 |
-| **Date** | 10/11/2026 |
+| **Date** | 11/11/2026 |
 | **Auteur** | MEKONTSO Olivier Steve (SM), issue #20 |
 | **Portée** | Vérification honnête des 8 critères avant la revue de sprint du 11/11 |
 
@@ -20,10 +20,10 @@ leur reste-à-faire est explicite : aucune promesse au-delà de ce qui tourne.
 | 2 | Une coupure réseau ne perd aucune mesure | ❌ | dépend de #12 (Store-and-Forward), non implémenté |
 | 3 | Plus de 48 h > 85 % déclenche une alerte | ✅ | `test_kpis.py` (alerte à 48 h, pas avant 47 h) |
 | 4 | Le prototype IA retourne un drapeau et un score | 🟡 | `test_diagnostic.py`, `ai/infer.py` (stub, `is_demo: true`) |
-| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | 🟡 | `dashboard/app.html`, `test_kpis.py` ; tableau CRUD (#16/#22) à venir |
+| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | `dashboard/index.html` + `app.js` + `grids.js`, 14 tests JS, `test_kpis.py` |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py` |
-| 7 | Chaque action de gestion affiche un toast | ❌ | `toast.js` = squelette (3 lignes) ; actions CRUD (#22) non branchées |
-| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 24 issues et 1 PR (#25) ; 33 des 35 commits sont du SM, travail direct sur `main` |
+| 7 | Chaque action de gestion affiche un toast | ✅ | `dashboard/js/toast.js` + appels `showToast` après chaque CRUD (`app.js`) |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 2 PR (#25, fusion du dashboard) ; 37 des 42 commits sont du SM, Mounpain : 0 |
 
 Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · ❌ non couvert.
 
@@ -74,17 +74,19 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
 - Reste : jeu d'images validé, exécution de `ai/train.py`, report de
   `val_accuracy` dans `ai/model/metrics.json` et dans le dossier final.
 
-### 5. L'acheteur voit les KPIs et obtient les mêmes données par l'API — 🟡
+### 5. L'acheteur voit les KPIs et obtient les mêmes données par l'API — ✅
 
-- Le dashboard (`dashboard/app.html`) affiche les 4 cartes KPI, le graphique
-  d'humidité et la courbe de prix, tous branchés sur l'API réelle avec repli de
-  démonstration explicite.
-- Les routes `GET /api/v1/kpis` et `GET /api/v1/prices/forecast` renvoient les
-  mêmes valeurs que celles affichées (contrat §4.4/§4.5).
-- Vérifié dans le navigateur avec un jeton réel : source « Données de l'API »,
-  0 erreur console, aucun débordement à 985 px.
-- Reste : le **tableau des parcelles** et les modales CRUD relèvent de #16/#22 ;
-  sans eux, le critère n'est pas complet au sens « KPIs + graphiques + tableau ».
+- Le dashboard fusionné le 11/11 (`dashboard/index.html` → `app.html`, modules
+  `api.js`, `app.js`, `grids.js`, `charts.js`, `metrics.js`) affiche les cartes
+  d'indicateurs, les graphiques Chart.js et les grilles jQWidgets des mesures,
+  parcelles, appareils, abonnés et journal.
+- Les mêmes données restent accessibles par l'API avec le jeton de l'acheteur :
+  `GET /api/v1/kpis`, `/measurements`, `/plots`, `/devices`, `/subscribers`.
+- Preuves : **14 tests JS** (`node --test js/*.test.js`), `backend/tests/test_kpis.py`,
+  et vérification par appels API sur une base neuve (8 mesures et une parcelle
+  créées au démarrage, connexion `acheteur@ebolowa.cm` → HTTP 200).
+- Limite assumée : le parcours navigateur complet n'a pas été rejoué le 11/11 ;
+  la validation visuelle reste à faire pendant la démonstration.
 
 ### 6. Les entrées invalides ou malveillantes sont rejetées — ✅
 
@@ -98,26 +100,31 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
   test E2E (rejet de `../etc/passwd` puis ingestion normale).
 - Preuve : commits `689c038` et `821b1a3`.
 
-### 7. Chaque action de gestion affiche un toast — ❌
+### 7. Chaque action de gestion affiche un toast — ✅
 
-- Le fichier `dashboard/js/toast.js` n'est qu'un squelette (3 lignes de TODO) :
-  aucun toast n'est implémenté dans l'application. Les actions de gestion
-  (créer/modifier/supprimer une parcelle, un appareil, un abonné) dépendent de
-  #22 et des pages CRUD de #16/#18.
-- Décision : ne pas cocher. Le toast est visible dans la maquette et le design
-  system, pas dans l'application.
+- `dashboard/js/toast.js` implémente `showToast(message, variant)` : nœud
+  `#toast-root` (présent dans `index.html` et `app.html`), icône, `role="status"`
+  pour les lecteurs d'écran, disparition après 4,2 s.
+- Branché sur les actions de gestion dans `app.js` : création et modification
+  d'une parcelle, d'un appareil et d'un abonné, et suppression (« Parcelle
+  supprimée. », « Appareil supprimé. », « Abonné supprimé. »).
+- Preuves : lecture du câblage `app.js` → `toast.js`, tests JS de validation des
+  formulaires CRUD (14 verts). Aucun test automatisé ne couvre le rendu visuel
+  du toast : à confirmer à l'écran pendant la démonstration.
 
 ### 8. L'historique Git montre le travail de chaque membre — 🟡
 
 - 24 issues réparties par module (A1-A6, B1-B2, C1-C2, G1), milestones Sprint 2
   à 4, Kanban public : la répartition du **travail prévu** est tracée.
-- Seule la PR #25 (backend de Mourad) est passée par une branche et une revue.
-  Les 33 autres commits sont du SM, directement sur `main`, et les blocs
-  simulateur/boîtier (Mounpain) et dashboard (Patrick) n'ont produit aucun
-  commit.
-- Conséquence : l'historique ne montre pas le travail de chaque membre, il
-  montre celui du SM. L'écart est assumé (voir `SPRINT_4_REVIEW.md` §9.1) et
-  laisse le critère **partiel**.
+- Deux apports extérieurs sont visibles dans l'historique : la PR #25 (backend
+  de Mourad, 2 commits) et la fusion du dashboard de NTPbreak le 11/11
+  (3 commits, `6d6e337`). Les 37 autres commits sont du SM, directement sur
+  `main`, et le bloc simulateur/boîtier (Mounpain, 73EGA) n'a produit aucun
+  commit sur aucune branche.
+- Conséquence : l'historique ne montre pas le travail de chaque membre. Il est
+  correct pour Mourad et Patrick (branches dédiées), incomplet pour le bloc C.
+  L'écart sur le travail direct du SM est assumé (voir `SPRINT_4_REVIEW.md`
+  §9.1) et laisse le critère **partiel**.
 - Preuve : `git log --format='%an' | sort | uniq -c`,
   [PR #25](https://github.com/stevetelecom/agro-data/pull/25),
   `docs/livrables/SPRINT_4_REVIEW.md`.
@@ -129,6 +136,7 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
 ```bash
 cd backend && pytest -q                 # 79 tests, dont test_e2e.py
 python scripts/demo_e2e.py              # backend démarré : parcours complet
+cd dashboard && node --test js/*.test.js  # 14 tests des modules du dashboard
 ```
 
 ---
@@ -141,9 +149,14 @@ python scripts/demo_e2e.py              # backend démarré : parcours complet
 3. Le diagnostic IA répond et rejette proprement les images invalides, en mode
    démonstration explicitement signalé.
 4. Les entrées malveillantes sont rejetées.
+5. L'acheteur se connecte au dashboard, consulte les indicateurs et les grilles,
+   et gère parcelles, appareils et abonnés avec un toast de confirmation
+   (critères 5 et 7), sur les mêmes données que l'API.
 
 ## Ce qu'elle ne peut pas affirmer
 
 1. La reprise après coupure réseau (critère 2) : non implémentée.
 2. Une précision de détection IA mesurée : le modèle n'est pas entraîné.
-3. Un tableau CRUD complet avec toasts (critères 5 et 7) : dépend de #16/#18/#22.
+3. Une alimentation par le simulateur ou le boîtier : `generator.py`,
+   `scenarios.py`, `store_forward.py` et le firmware sont encore des squelettes.
+4. Les champs `village` et `surface_ha` des parcelles : écart #18 non corrigé.

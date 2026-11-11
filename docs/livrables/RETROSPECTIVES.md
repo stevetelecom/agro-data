@@ -95,8 +95,8 @@ principales**, suivies au sprint suivant. Le format est celui du classique
 
 ## Sprint 4 — Restitution et intégration
 
-**Tenue le** : 11/11/2026 — section rédigée le 10/11 à partir de l'état du
-dépôt, à confirmer en séance.
+**Tenue le** : 11/11/2026 — section rédigée le 10/11 puis corrigée le 11/11
+après fusion de la branche du dashboard, à confirmer en séance.
 
 ### Ce qui a marché
 
@@ -108,13 +108,22 @@ dépôt, à confirmer en séance.
   revue : aucune improvisation le jour J.
 - Le Kanban a été remis à jour la veille (5 issues fermées avec preuves,
   cases cochées) au lieu de rester décorrélé du code.
+- Le dashboard du bloc B a été récupéré le jour de l'échéance : la branche
+  existait, testée (14 tests JS), mais sans PR. La vérification de `main` contre
+  les branches distantes a évité de livrer sans lui.
 
 ### Ce qui n'a pas marché
 
-- **Deux blocs entiers sans code exécutable** : simulateur/boîtier (C) et
-  dashboard (B). Les assignés n'ont livré aucun commit utile en quatre
-  sprints, et le SM n'a pas escaladé assez tôt (action R3-5 non appliquée).
-- **Travail direct sur `main` assumé par le SM** : 33 des 35 commits y sont
+- **Bloc C sans aucune ligne de code** : simulateur, store-and-forward et
+  firmware sont restés des squelettes pendant quatre sprints. Mounpain (73EGA)
+  n'a produit **aucun commit** sur aucune branche ; le SM n'a pas escaladé
+  assez tôt (action R3-5 non appliquée). C'est la cause du critère §17.2
+  manquant.
+- **Bloc B livré mais invisible** : le dashboard de Patrick était complet sur
+  sa branche, sans PR ouverte. Il a été découvert à J-1 et fusionné le jour de
+  l'échéance, avec 11 conflits à résoudre. Une branche poussée n'est pas une
+  livraison.
+- **Travail direct sur `main` assumé par le SM** : 37 des 42 commits y sont
   allés directement, sans PR ni revue. Ce n'est pas un oubli mais une pratique
   choisie (seul développeur backend, itérations courtes) ; elle reste un écart
   à la DoD, et le critère §17.8 (historique montrant le travail de chacun) n'est
@@ -138,12 +147,14 @@ dépôt, à confirmer en séance.
 | R4-3 | Ne plus jamais cocher une case sans preuve exécutable (test, route, capture) | tous | immédiat |
 | R4-4 | Obtenir la validation du PO sur le contrat, le design system et les critères §17, ou consigner formellement son absence en Review | PO + SM | 11/11 |
 | R4-5 | Découper chaque module en tickets de 2 jours maximum et vérifier l'avancement à mi-sprint, pas à J-1 | SM | prochaine itération |
+| R4-6 | Vérifier chaque branche distante (`git fetch` + comparaison à `main`) avant toute revue : une branche sans PR n'entre jamais dans la livraison par accident | SM | ✅ appliqué le 11/11 |
+| R4-7 | Exiger une PR ouverte au moins 48 h avant l'échéance, même pour un travail jugé terminé | tous | prochaine itération |
 
 ---
 
 ## Suivi des actions
 
-| Action | Sprint d'origine | Statut au 10/11/2026 |
+| Action | Sprint d'origine | Statut au 11/11/2026 |
 |---|---|---|
 | R2-1 tags de sprint | S2 | ✅ fait, en retard |
 | R2-2 version provisoire du contrat | S2 | ✅ appliqué |
@@ -153,9 +164,11 @@ dépôt, à confirmer en séance.
 | R3-2 livrer la couche métier seule | S3 | ✅ appliqué |
 | R3-3 une PR = un module | S3 | ❌ non appliqué — travail direct sur `main` assumé par le SM |
 | R3-4 démo de secours | S3 | ✅ maquette prête (`maquettes/agro-data-maquette.html`) |
-| R3-5 suppléant par module | S3 | ❌ non appliqué (blocs B et C sans code) |
-| R4-1 tag `v-final` annoté et partiel | S4 | ✅ fait le 10/11 (reste à pousser sur `origin`) |
-| R4-2 livrer #6, #12, #8, #22 en PR | S4 | ⏳ prochaine itération |
+| R3-5 suppléant par module | S3 | ❌ non appliqué (bloc C sans code) |
+| R4-1 tag `v-final` annoté et partiel | S4 | ✅ recréé le 11/11 sur l'état fusionné (reste à pousser) |
+| R4-2 livrer #6, #12, #8, #22 en PR | S4 | 🟡 #8 et #22 livrés (branche de NTPbreak fusionnée) ; #6 et #12 non livrés |
 | R4-3 aucune case cochée sans preuve | S4 | ✅ appliqué le 10/11 (issue #20 corrigée) |
 | R4-4 validation PO ou absence consignée | S4 | ⏳ 11/11 |
 | R4-5 tickets de 2 jours maximum | S4 | ⏳ prochaine itération |
+| R4-6 vérifier les branches distantes avant revue | S4 | ✅ appliqué le 11/11 (dashboard récupéré) |
+| R4-7 PR ouverte 48 h avant l'échéance | S4 | ⏳ prochaine itération |

@@ -46,7 +46,7 @@ python -m http.server 8080       # http://127.0.0.1:8080/dashboard/
 
 Le port 8080 est déjà autorisé par le CORS du backend. L'écran de connexion
 (`dashboard/index.html`) ouvre le tableau de bord complet (`app.html`) :
-indicateurs, examens, mesures, parcelles, appareils et abonnés.
+indicateurs, mesures, parcelles, appareils, abonnés, vue terrain et journal.
 
 L'adresse de l'API est `http://127.0.0.1:8000` par défaut. Elle se surcharge avec
 la variable `API_BASE_URL` d'un fichier `.env` à la racine (fichier local, non
