@@ -26,7 +26,7 @@ class HumiditySeries(BaseModel):
 
     plot_id: int
     plot_name: str
-    under_alert: bool = Field(..., description="Vrai si la parcelle dépasse 48 h au-dessus de 85 %.")
+    under_alert: bool = Field(..., description="Vrai si la parcelle reste 48 h ou plus au-dessus de 85 %.")
     points: list[HumidityPoint]
 
 

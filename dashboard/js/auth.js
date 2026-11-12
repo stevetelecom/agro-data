@@ -10,9 +10,12 @@ import { showToast } from "./toast.js";
 const SESSION_KEY = "agro_session";
 const PASSWORD_MIN_LENGTH = 8;
 
+// Comptes de secours hors ligne, alignés sur le contrat §4.8 et sur la
+// maquette : ce sont les mêmes identifiants que l'API. Ils n'ouvrent qu'une
+// session locale de démonstration, sans jeton serveur.
 const DEMO_USERS = [
-  { email: "admin@agrodata.local", password: "Admin2026!", name: "Administration", role: "admin" },
-  { email: "acheteur@agrodata.local", password: "Acheteur2026!", name: "Acheteur Ebolowa", role: "acheteur" },
+  { email: "acheteur@ebolowa.cm", password: "demo1234", name: "Acheteur Ebolowa", role: "admin" },
+  { email: "lecteur@ebolowa.cm", password: "demo1234", name: "Lecteur Ebolowa", role: "acheteur" },
 ];
 
 /**

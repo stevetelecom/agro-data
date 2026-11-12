@@ -12,6 +12,9 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from app.schemas.crud import PlotRead
+from app.schemas.diagnostic import DiagnosticRead
+from app.schemas.indicators import KpisRead, PriceForecastRead
 from app.schemas.measurement import MeasurementCreate
 
 DOC = Path(__file__).resolve().parents[2] / "docs" / "CONTRAT_JSON.md"
@@ -53,3 +56,31 @@ def test_exemple_rejete_est_refuse_par_le_schema():
     payload = _exemple("## 5. Exemples rejetés")
     with pytest.raises(ValidationError):
         MeasurementCreate.model_validate(payload)
+
+
+def test_exemple_kpis_valide_le_schema():
+    payload = _exemple("### 4.4 Indicateurs du tableau de bord")
+    kpis = KpisRead.model_validate(payload)
+    assert set(payload) == set(KpisRead.model_fields)
+    assert kpis.level in {"faible", "modere", "eleve"}
+
+
+def test_exemple_prix_valide_le_schema():
+    payload = _exemple("### 4.5 Courbe de prix prédictive")
+    prix = PriceForecastRead.model_validate(payload)
+    assert set(payload) == set(PriceForecastRead.model_fields)
+    assert prix.formula_version == "v1"
+
+
+def test_exemple_parcelle_valide_le_schema():
+    payload = _exemple("### 4.6 Parcelles")
+    parcelle = PlotRead.model_validate(payload)
+    assert set(payload) == set(PlotRead.model_fields)
+    assert parcelle.level in {"faible", "modere", "eleve"}
+
+
+def test_exemple_diagnostic_valide_le_schema():
+    payload = _exemple("### 4.7 Diagnostic IA")
+    diagnostic = DiagnosticRead.model_validate(payload)
+    assert set(payload) == set(DiagnosticRead.model_fields)
+    assert diagnostic.is_demo is True

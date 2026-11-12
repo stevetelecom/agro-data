@@ -7,10 +7,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Plot, User
+from app.models import Device, Plot, User
 from app.schemas.crud import PlotCreate, PlotRead, PlotUpdate
 from app.security.auth import require_roles
 from app.security.rate_limit import rate_limit_dependency
+from app.services.indicators import plot_indicators
 
 router = APIRouter(
     prefix="/api/v1/plots",
@@ -19,12 +20,19 @@ router = APIRouter(
 )
 
 
+def _read(db: Session, plot: Plot) -> dict[str, object]:
+    """Réponse d'une parcelle : champs stockés + indicateurs calculés (§4.6)."""
+    payload = PlotRead.model_validate(plot).model_dump()
+    payload.update(plot_indicators(db, plot.id))
+    return payload
+
+
 @router.get("", response_model=list[PlotRead])
 def list_plots(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin", "acheteur")),
-) -> list[Plot]:
-    return db.query(Plot).order_by(Plot.id).all()
+) -> list[dict[str, object]]:
+    return [_read(db, plot) for plot in db.query(Plot).order_by(Plot.id).all()]
 
 
 @router.post("", response_model=PlotRead, status_code=status.HTTP_201_CREATED)
@@ -32,7 +40,7 @@ def create_plot(
     body: PlotCreate,
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin")),
-) -> Plot:
+) -> dict[str, object]:
     if db.query(Plot).filter(Plot.code == body.code).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Code parcelle déjà utilisé")
     row = Plot(
@@ -46,7 +54,7 @@ def create_plot(
     db.add(row)
     db.commit()
     db.refresh(row)
-    return row
+    return _read(db, row)
 
 
 @router.get("/{plot_id}", response_model=PlotRead)
@@ -54,11 +62,11 @@ def get_plot(
     plot_id: int,
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin", "acheteur")),
-) -> Plot:
+) -> dict[str, object]:
     row = db.query(Plot).filter(Plot.id == plot_id).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parcelle introuvable")
-    return row
+    return _read(db, row)
 
 
 @router.put("/{plot_id}", response_model=PlotRead)
@@ -67,7 +75,7 @@ def update_plot(
     body: PlotUpdate,
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin")),
-) -> Plot:
+) -> dict[str, object]:
     row = db.query(Plot).filter(Plot.id == plot_id).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parcelle introuvable")
@@ -76,7 +84,7 @@ def update_plot(
         setattr(row, key, value)
     db.commit()
     db.refresh(row)
-    return row
+    return _read(db, row)
 
 
 @router.delete("/{plot_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -88,5 +96,13 @@ def delete_plot(
     row = db.query(Plot).filter(Plot.id == plot_id).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parcelle introuvable")
+    # Contrat §4.6 : on refuse de supprimer une parcelle encore supervisée par
+    # un boîtier, pour ne pas détacher silencieusement l'appareil.
+    attached = db.query(Device).filter(Device.plot_id == plot_id).count()
+    if attached:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"{attached} appareil(s) encore rattaché(s) à cette parcelle",
+        )
     db.delete(row)
     db.commit()

@@ -196,6 +196,46 @@ def test_delta_humidite_sur_sept_jours(db_session):
     assert kpis["humidity_delta_7d"] == pytest.approx(5.0)
 
 
+def test_delta_humidite_reste_sur_sept_jours_quelle_que_soit_la_fenetre(db_session):
+    """`humidity_delta_7d` ne dépend pas du paramètre `days` (contrat §4.4)."""
+    # Fenêtre courante d'un jour à 80 %, 7 jours précédents à 75 %.
+    _add_measurement(db_session, "AMB-P001", NOW - 2 * 3600, 80.0)
+    _add_measurement(db_session, "AMB-P001", NOW - 3 * 86400, 75.0)
+    db_session.commit()
+
+    kpis = build_kpis(db_session, days=1, now=NOW)
+    assert kpis["avg_air_humidity_pct"] == pytest.approx(80.0)
+    assert kpis["humidity_delta_7d"] == pytest.approx(5.0)
+
+
+def test_volume_sain_inclut_les_parcelles_sans_mesure(db_session):
+    """Contrat §4.4 : une parcelle sans mesure garde un indice nul (100 % sain)."""
+    suivie = Plot(
+        code="P-SUIVIE",
+        name="Parcelle suivie",
+        village="Ambam",
+        surface_ha=1.0,
+        reference_volume_kg=1000.0,
+    )
+    sans_mesure = Plot(
+        code="P-SANS",
+        name="Parcelle sans mesure",
+        village="Ambam",
+        surface_ha=1.0,
+        reference_volume_kg=500.0,
+    )
+    db_session.add_all([suivie, sans_mesure])
+    db_session.flush()
+    db_session.add(Device(device_id="AMB-P001", plot_id=suivie.id))
+    db_session.commit()
+
+    _hourly_run(db_session, "AMB-P001", 48, 90.0)
+    kpis = build_kpis(db_session, now=NOW)
+    assert kpis["plots_monitored"] == 1
+    # 1000 x (1 - 60/100) + 500 x (1 - 0/100) = 400 + 500.
+    assert kpis["estimated_healthy_volume_kg"] == pytest.approx(900.0)
+
+
 def test_courbe_de_prix_utilise_un_prix_de_reference_constant(db_session):
     _hourly_run(db_session, "AMB-P001", 48, 90.0)
     payload = build_price_forecast(db_session, now=NOW)

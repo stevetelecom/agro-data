@@ -77,7 +77,12 @@ def level_for(index: int) -> str:
 
 
 def is_alert(hours_above_85: float) -> bool:
-    """Vrai si la parcelle est en alerte RM1 (plus de 48 h au-dessus de 85 %)."""
+    """Vrai si la parcelle est en alerte RM1 (48 h ou plus au-dessus de 85 %).
+
+    Le contrat §4.4 et le CDC §17.3 parlent de « plus de 48 h ». Avec des
+    mesures horaires, une série de 48 points consécutifs couvre 48 h : le
+    seuil est donc inclusif (`>=`), ce que le contrat explicite désormais.
+    """
     return hours_above_85 >= ALERT_DURATION_HOURS
 
 

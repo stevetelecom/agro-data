@@ -3,9 +3,14 @@ Rôle : schémas CRUD parcelles, appareils, abonnés.
 Auteur : NKWANE Mourad (MOD-A6).
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 _EMAIL = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
+# Niveaux d'infestation du contrat §4.4 / §4.6.
+Level = Literal["faible", "modere", "eleve"]
 
 
 class PlotCreate(BaseModel):
@@ -47,6 +52,13 @@ class PlotRead(BaseModel):
     village: str
     surface_ha: float
     reference_volume_kg: float
+    # Champs calculés, en lecture seule (contrat §4.6). Ils sont renseignés par
+    # le routeur depuis les mesures ; les valeurs par défaut couvrent une
+    # parcelle sans mesure.
+    hours_above_85: int = Field(default=0, ge=0, le=168)
+    ia_detection_rate: float = Field(default=0.0, ge=0, le=1)
+    infestation_index: int = Field(default=0, ge=0, le=100)
+    level: Level = "faible"
 
     model_config = ConfigDict(from_attributes=True)
 

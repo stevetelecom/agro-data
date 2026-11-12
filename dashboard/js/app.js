@@ -43,6 +43,9 @@ const TITLES = {
   journal: "Journal des prix",
 };
 
+// Fenêtre demandée à `/api/v1/kpis` (voir `loadIndicators`).
+const KPI_WINDOW_DAYS = 7;
+
 const state = {
   session: null,
   db: null,
@@ -138,6 +141,17 @@ function renderDashboard(root) {
   const humidity = kpis ? kpis.avg_air_humidity_pct : summary.global.humidity;
   const alerts = kpis ? kpis.active_alerts : summary.global.alerts;
   const healthyKg = kpis ? kpis.estimated_healthy_volume_kg : summary.global.healthyKg;
+  // Le pourcentage affiché est celui du volume de référence réellement présent
+  // dans le périmètre : il ne peut pas contredire le kg affiché à côté.
+  const referenceKg = scopedPlots().reduce(
+    (total, plot) => total + (Number(plot.reference_volume_kg) || 0),
+    0,
+  );
+  const healthyPct = referenceKg > 0 ? (healthyKg / referenceKg) * 100 : null;
+  const healthyHint =
+    healthyKg > 0 && healthyPct !== null
+      ? `${formatNumber(healthyPct, 0)} % du volume de référence`
+      : "Renseignez le volume de référence des parcelles";
   const forecast = priceForecast(index, alerts);
   const reference = forecast[0]?.reference ?? PRICE_REFERENCE_FCFA_KG;
   const formula = indicators()?.forecast?.formulaVersion || PRICE_FORMULA_VERSION;
@@ -154,14 +168,12 @@ function renderDashboard(root) {
   }
   root.append(el("section", { class: "kpi-grid" }, [
     kpi("Indice d'infestation", formatNumber(index), LEVEL_LABEL[level], level),
-    kpi("Humidité moyenne", humidity === null ? "—" : `${formatNumber(humidity)} %`, "24 dernières heures", humidityTone(humidity)),
+    kpi("Humidité moyenne", humidity === null ? "—" : `${formatNumber(humidity)} %`, `${KPI_WINDOW_DAYS} derniers jours`, humidityTone(humidity)),
     kpi("Alertes actives", formatNumber(alerts, 0), "Parcelles au-delà de 48 h", alerts > 0 ? "eleve" : "faible"),
     kpi(
       "Volume sain estimé",
       healthyKg > 0 ? `${formatNumber(healthyKg, 0)} kg` : "—",
-      kpis && healthyKg > 0
-        ? `${formatNumber(kpis.estimated_healthy_volume_pct, 0)} % du volume de référence`
-        : "Renseignez le volume de référence des parcelles",
+      healthyHint,
       "neutral",
     ),
   ]));

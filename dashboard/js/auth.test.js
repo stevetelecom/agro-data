@@ -59,12 +59,21 @@ test("ouvre une session de démonstration quand l'API est injoignable", async ()
   globalThis.fetch = async () => {
     throw new Error("offline");
   };
-  await login("admin@agrodata.local", "Admin2026!");
+  await login("acheteur@ebolowa.cm", "demo1234");
   const session = getSession();
-  assert.equal(session.email, "admin@agrodata.local");
+  assert.equal(session.email, "acheteur@ebolowa.cm");
   assert.equal(session.role, "admin");
   assert.equal(session.mode, "demo");
   logout();
+  assert.equal(getSession(), null);
+});
+
+test("refuse un ancien compte hors ligne non documenté", async () => {
+  installSessionStorage();
+  globalThis.fetch = async () => {
+    throw new Error("offline");
+  };
+  await assert.rejects(() => login("admin@agrodata.local", "Admin2026!"), /indisponible/);
   assert.equal(getSession(), null);
 });
 
@@ -128,7 +137,7 @@ test("annonce un service indisponible quand l'API est injoignable et le compte i
     throw new TypeError("fetch failed");
   };
   await assert.rejects(
-    () => login("admin@agrodata.local", "Mauvais2026!"),
+    () => login("acheteur@ebolowa.cm", "Mauvais2026!"),
     /indisponible/,
   );
   assert.equal(getSession(), null);
@@ -142,7 +151,7 @@ test("ne bascule pas en démonstration quand l'API répond une erreur 500", asyn
     json: async () => ({ detail: "Erreur interne" }),
   });
   await assert.rejects(
-    () => login("admin@agrodata.local", "Admin2026!"),
+    () => login("acheteur@ebolowa.cm", "demo1234"),
     /HTTP 500/,
   );
   assert.equal(getSession(), null);

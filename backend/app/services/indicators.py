@@ -173,6 +173,29 @@ def _daily_series(rows: list[Measurement]) -> list[dict[str, object]]:
     ]
 
 
+def plot_indicators(
+    db: Session,
+    plot_id: int,
+    days: int = 7,
+    now: int | None = None,
+) -> dict[str, object]:
+    """Champs calculés de `GET /api/v1/plots/{id}` (contrat §4.6).
+
+    Les quatre valeurs sont en lecture seule : elles sont recalculées à chaque
+    lecture depuis les mesures de la fenêtre, et jamais acceptées en écriture.
+    """
+    fin = now if now is not None else int(time.time())
+    debut = fin - days * SECONDS_PER_DAY
+    rows = _query_rows(db, debut, fin, plot_id=plot_id)
+    metriques = compute_plot_metrics(plot_id, "", rows)
+    return {
+        "hours_above_85": int(round(metriques.hours_above_85)),
+        "ia_detection_rate": round(metriques.ia_detection_rate, 3),
+        "infestation_index": metriques.index,
+        "level": level_for(metriques.index),
+    }
+
+
 def build_kpis(
     db: Session,
     days: int = 7,
@@ -189,14 +212,23 @@ def build_kpis(
     index_global = aggregate_index([groupe.index for groupe in groupes])
     humidite_moyenne = _mean([row.air_humidity_pct for row in rows])
     # Volume encore commercialisable : volume de référence de chaque parcelle
-    # diminué de son indice d'infestation. Les boîtiers non rattachés à une
-    # parcelle (plot_id = 0) n'ont pas de volume de référence connu.
+    # diminué de son indice d'infestation. Une parcelle sans mesure dans la
+    # fenêtre garde un indice nul : elle contribue à 100 % de son volume, comme
+    # le prévoit le contrat §4.4. Les boîtiers non rattachés à une parcelle
+    # (plot_id = 0) n'ont pas de volume de référence connu.
+    indices = {groupe.plot_id: groupe.index for groupe in groupes}
     volumes = {plot.id: plot.reference_volume_kg for plot in db.query(Plot).all()}
+    if plot_id is not None:
+        volumes = {identifiant: volume for identifiant, volume in volumes.items() if identifiant == plot_id}
     volume_sain_kg = sum(
-        volumes.get(groupe.plot_id, 0.0) * (1 - groupe.index / 100) for groupe in groupes
+        volume * (1 - indices.get(identifiant, 0) / 100)
+        for identifiant, volume in volumes.items()
     )
 
-    rows_precedents = _query_rows(db, debut - days * SECONDS_PER_DAY, debut, plot_id)
+    # `humidity_delta_7d` compare toujours la fenêtre courante aux 7 jours qui
+    # la précèdent, indépendamment de `days` : c'est ce que promet son nom et
+    # le contrat §4.4.
+    rows_precedents = _query_rows(db, debut - 7 * SECONDS_PER_DAY, debut, plot_id)
     if rows_precedents:
         humidite_precedente = _mean([row.air_humidity_pct for row in rows_precedents])
         delta_humidite = humidite_moyenne - humidite_precedente

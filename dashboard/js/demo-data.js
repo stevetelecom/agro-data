@@ -99,7 +99,7 @@ export function createSeed() {
     status: "actif",
   }));
   const subscribers = [
-    { id: "s1", name: "Administration", email: "admin@agrodata.local", role: "admin", plan: "Exploitation" },
+    { id: "s1", name: "Administration", email: "acheteur@ebolowa.cm", role: "admin", plan: "Exploitation" },
     { id: "s2", name: "Acheteur Ebolowa", email: "acheteur@agrodata.local", role: "acheteur", plan: "Marché" },
   ];
   const measurements = [];
