@@ -27,6 +27,7 @@ avec le suivi des actions d'un sprint sur l'autre.
 |---|---|
 | [`CRITERES_ACCEPTATION.md`](CRITERES_ACCEPTATION.md) | les 8 critères du CDC §17, leur statut et leur preuve exécutable (tests, routes, commits) |
 | [`PV_RECETTE.md`](PV_RECETTE.md) | procès-verbal de recette du tag `v4-partiel` : preuves, réserves, commandes de démonstration |
+| [`AUDIT.md`](AUDIT.md) | audit indépendant de fin de projet : constats A1-A22, preuves, correctifs appliqués |
 
 ## Versions du dossier
 
@@ -44,5 +45,5 @@ est complet ou partiel, et renvoie au compte-rendu.
 - [`../CAHIER_DES_CHARGES.md`](../CAHIER_DES_CHARGES.md) : besoin, périmètre, critères §17
 - [`PLAN_DE_CODAGE`](../PLAN_DE_CODAGE.md) : architecture, modules, sprints
 - [`../PRODUCT_BACKLOG.md`](../PRODUCT_BACKLOG.md) : PB-01 à PB-15
-- [`../CONTRAT_JSON.md`](../CONTRAT_JSON.md) : contrat d'échange, version 1.2
+- [`../CONTRAT_JSON.md`](../CONTRAT_JSON.md) : contrat d'échange, version 1.3
 - [`../DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md) : palette, composants, écrans

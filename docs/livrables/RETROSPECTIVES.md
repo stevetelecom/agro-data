@@ -126,7 +126,7 @@ après fusion de la branche du dashboard, à confirmer en séance.
   sa branche, sans PR ouverte. Il a été découvert à J-1 et fusionné le jour de
   l'échéance, avec 11 conflits à résoudre. Une branche poussée n'est pas une
   livraison.
-- **Travail direct sur `main` assumé par le SM** : 51 des 58 commits y sont
+- **Travail direct sur `main` assumé par le SM** : 52 des 59 commits y sont
   allés directement, sans PR ni revue. Ce n'est pas un oubli mais une pratique
   choisie (seul développeur backend, itérations courtes) ; elle reste un écart
   à la DoD, et le critère §17.8 (historique montrant le travail de chacun) n'est
