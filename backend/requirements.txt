@@ -3,7 +3,7 @@
 # toute mise à jour passe désormais par une modification explicite de ce fichier.
 fastapi==0.162.4
 uvicorn[standard]==0.54.0
-SQLAlchemy==2.0.57
+SQLAlchemy==2.1.8
 pydantic==2.14.3
 pydantic-settings==2.15.0
 PyJWT==2.15.1
