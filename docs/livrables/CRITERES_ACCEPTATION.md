@@ -23,7 +23,7 @@ leur reste-à-faire est explicite : aucune promesse au-delà de ce qui tourne.
 | 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | Dashboard branché sur `/api/v1/kpis` et `/prices/forecast`, 18 tests JS, `test_kpis.py` |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py` |
 | 7 | Chaque action de gestion affiche un toast | ✅ | `dashboard/js/toast.js` + appels `showToast` après chaque CRUD (`app.js`) |
-| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 1 PR (#25) et 1 branche fusionnée sans PR (dashboard) ; 51 des 58 commits de `main` sont du SM ; Mounpain : 2 commits sur `sahoda`, fusionnés le 11/11 (`06e5d66`) |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 1 PR (#25) et 1 branche fusionnée sans PR (dashboard) ; 52 des 59 commits de `main` sont du SM ; Mounpain : 2 commits sur `sahoda`, fusionnés le 11/11 (`06e5d66`) |
 
 Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · ❌ non couvert.
 

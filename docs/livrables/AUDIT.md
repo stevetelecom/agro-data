@@ -36,6 +36,10 @@
 avant de présenter le dossier comme « audité ». Le code n'a pas besoin d'être
 refondu ; le dossier a besoin d'être remis à jour.
 
+> **Mise à jour du 12/11/2026.** Les points P1 et P2 ont été corrigés et les
+> documents réalignés ; le détail et les preuves sont en **§10**. Le verdict
+> ci-dessus décrit l'état audité `886cb29`, avant correctifs.
+
 ---
 
 ## 2. Preuves exécutées
@@ -489,7 +493,7 @@ documents de clôture ont été réalignés sur l'état final.
 | A1 | `DELETE /api/v1/plots/{id}` répond `409` si un appareil est rattaché | `test_crud.py` ; vérifié en direct : `HTTP 409 {"detail":"1 appareil(s) encore rattaché(s) à cette parcelle"}` |
 | A2 | `PlotRead` expose `hours_above_85`, `ia_detection_rate`, `infestation_index`, `level` via `plot_indicators()` | `test_crud.py`, `test_contract.py` ; `GET /plots` vérifié en direct |
 | A3 | Tag renommé **`v4-partiel`**, message annoté listant livré / non-livré | `git tag -n99 v4-partiel` |
-| A4 | `SPRINT_4_REVIEW`, `PV_RECETTE`, `CRITERES_ACCEPTATION`, `RETROSPECTIVES`, `README`, `RITUELS_SCRUM`, `PLAN_DE_CODAGE` réalignés (106/18 tests, 24/21 issues, 58 commits, 51/3/2/2, 4 ✅/3 🟡) | relecture + `git log` |
+| A4 | `SPRINT_4_REVIEW`, `PV_RECETTE`, `CRITERES_ACCEPTATION`, `RETROSPECTIVES`, `README`, `RITUELS_SCRUM`, `PLAN_DE_CODAGE` réalignés (106/18 tests, 24/21 issues, 59 commits, 52/3/2/2, 4 ✅/3 🟡) | relecture + `git log` |
 | A5 | Libellé « 7 derniers jours » au lieu de « 24 dernières heures » | rendu navigateur |
 | A6 | « 31 % du volume de référence » (372/1200) au lieu de 52 % | rendu navigateur |
 | A7 | Comptes hors ligne alignés sur le contrat §4.8 : `acheteur@ebolowa.cm` / `lecteur@ebolowa.cm`, mot de passe `demo1234` ; `admin@agrodata.local` supprimé | `auth.test.js`, `demo-data.js` |
@@ -512,10 +516,10 @@ documents de clôture ont été réalignés sur l'état final.
 
 ### Points restés ouverts (hors périmètre de l'audit)
 
-- **Validation PO** : #14, #17 et #20 restent ouvertes ; milestones Sprint 2/3/4
-  encore `open`. Le PV de recette est signé par le SM mandaté.
+- **Validation PO** : #14, #17 et #20 restent ouvertes ; milestones Sprint 3 et 4
+  encore `open` (Sprint 2 fermé). Le PV de recette est signé par le SM mandaté.
 - **IA non entraînée** (§17.4) : `ai/dataset` vide, route en `is_demo: true`.
 - **Firmware** : écrit, non compilé ni flashé.
 - **Prix v2** : non spécifié par le PO ; seule la formule v1 est exposée.
-- **Historique Git** (§17.8) : 51 des 58 commits de `main` sont du SM ; critère
+- **Historique Git** (§17.8) : 52 des 59 commits de `main` sont du SM ; critère
   partiel, assumé et documenté en `SPRINT_4_REVIEW.md` §9.

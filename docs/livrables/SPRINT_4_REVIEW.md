@@ -145,7 +145,7 @@ persistées, tampon vidé, aucun doublon.
 | 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | dashboard branché sur `/kpis` et `/prices/forecast` + 18 tests JS + `test_kpis.py` ; `GET /plots` expose les mêmes champs calculés que le dashboard |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py`, `device_id` contraint |
 | 7 | Chaque action de gestion affiche un toast | ✅ | `toast.js` branché sur chaque CRUD (`app.js`) |
-| 8 | L'historique Git montre le travail de chaque membre | 🟡 | voir §9 : 3 apports extérieurs, 51 des 58 commits de `main` du SM, Mounpain 2 commits sur `sahoda` |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | voir §9 : 3 apports extérieurs, 52 des 59 commits de `main` du SM, Mounpain 2 commits sur `sahoda` |
 
 Bilan : **6 validés**, **2 partiels**, **0 non couvert**. Les critères 5 et 7,
 annoncés non couverts le 10/11, sont couverts depuis la fusion du dashboard ; le
@@ -188,14 +188,14 @@ n'a pas été compilé, la démonstration s'appuie sur le simulateur.
 | Issues du dépôt (total / fermées) | 24 / 21 |
 | Issues du Sprint 4 terminées | 4 terminées et 3 partiels sur 7, dont 3 repris par le SM (#6, #12, #19) |
 | Tests automatisés sur `main` | 106 backend + 18 JS |
-| Commits sur `main` | 58 |
-| Commits du SM / de NTPbreak / de Mourad / de 73EGA | 51 / 3 / 2 / 2 |
+| Commits sur `main` | 59 |
+| Commits du SM / de NTPbreak / de Mourad / de 73EGA | 52 / 3 / 2 / 2 |
 | Pull requests fusionnées | 1 (#25) ; 1 branche fusionnée sans PR |
 | Critères §17 validés | 6 sur 8 |
 
 ## 9. Écarts de processus
 
-1. **Travail direct sur `main`** : 51 des 58 commits sont allés directement sur
+1. **Travail direct sur `main`** : 52 des 59 commits sont allés directement sur
    `main`, sans PR ni revue. C'est un **choix assumé du SM** (seul développeur
    sur le backend, itérations courtes), qui s'écarte de la DoD et de l'action
    R2-4 ; seule la PR #25 est passée par une branche et une revue. L'historique
