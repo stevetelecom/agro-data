@@ -3,7 +3,7 @@
 | Champ | Valeur |
 |---|---|
 | Projet | AGRO-DATA — surveillance de la pourriture brune du cacaoyer |
-| Livraison | Sprint 4, tag `v-final` |
+| Livraison | Sprint 4, tag `v4-partiel` |
 | Date de recette | 11/11/2026 |
 | Environnement | Python 3.10, FastAPI + Uvicorn, SQLite, Chrome 141, `127.0.0.1` |
 | Rédacteur | MEKONTSO Olivier Steve (SM) |
@@ -20,7 +20,7 @@ que la démonstration de soutenance est reproductible en trois commandes.
 
 | Élément | Version testée |
 |---|---|
-| Backend | commit `29cfd01`, base SQLite recréée à zéro |
+| Backend | commit de livraison `v4-partiel` (après correctifs de l'audit), base SQLite recréée à zéro |
 | Dashboard | même commit, servi par `http.server` sur le port 8080 |
 | Simulateur | `python -m simulator` (sain, humidité critique, coupure réseau) |
 | IA | route `POST /api/v1/diagnostic`, mode `is_demo: true` |
@@ -30,8 +30,8 @@ que la démonstration de soutenance est reproductible en trois commandes.
 
 | Commande | Résultat |
 |---|---|
-| `cd backend && python -m pytest -q` | **95 passed** |
-| `cd dashboard && node --test js/*.test.js` | **17 pass, 0 fail** |
+| `cd backend && python -m pytest -q` | **106 passed** |
+| `node --test dashboard/js/*.test.js` | **18 pass, 0 fail** |
 | `python scripts/demo_e2e.py` | **10 contrôles OK, exit 0** |
 
 Dernier passage de la démonstration de bout en bout :
@@ -49,6 +49,13 @@ OK  GET /api/v1/prices/forecast répond
 OK  prix ajusté 1158.67 > référence 1050.0 (FCFA/kg, is_demo=True)
 ```
 
+Ces preuves ont été rejouées après application des correctifs de l'audit de fin
+de projet (`docs/livrables/AUDIT.md`) : contrôle `409` avant suppression d'une
+parcelle appareillée, indicateurs calculés exposés par `GET /plots`, libellés KPI
+du dashboard corrigés, comptes de démonstration alignés sur la maquette,
+garde-fou de configuration en production, CI à quatre jobs, seuils et fenêtres
+d'analyse documentés et testés.
+
 ## 4. Recette des huit critères (CDC §17)
 
 | # | Critère | Statut | Preuve / limite |
@@ -57,7 +64,7 @@ OK  prix ajusté 1158.67 > référence 1050.0 (FCFA/kg, is_demo=True)
 | 2 | Coupure réseau sans perte | ✅ | `test_simulator.py` ; CLI réelle : 24 mesures hors ligne, 20 renvoyées, 4 doublons refusés, 0 en attente |
 | 3 | > 48 h à plus de 85 % déclenche une alerte | ✅ | `test_infestation.py`, `test_kpis.py` (48 h oui, 47 h non), `/kpis` |
 | 4 | Prototype IA : drapeau + score | 🟡 | route livrée et testée, `is_demo: true`, modèle non entraîné (jeu d'images vide) |
-| 5 | L'acheteur voit les KPIs, mêmes données par l'API | ✅ | dashboard branché sur `/kpis` et `/prices/forecast`, rendu vérifié dans Chrome, 17 tests JS |
+| 5 | L'acheteur voit les KPIs, mêmes données par l'API | ✅ | dashboard branché sur `/kpis` et `/prices/forecast`, rendu vérifié dans Chrome, 18 tests JS |
 | 6 | Entrées invalides ou malveillantes rejetées | ✅ | `test_measurements.py`, `test_security.py`, `device_id` contraint, 422 vérifié |
 | 7 | Chaque action de gestion affiche un toast | ✅ | `toast.js` appelé après chaque CRUD |
 | 8 | L'historique Git montre le travail de chaque membre | 🟡 | 3 apports extérieurs (PR #25, dashboard, `sahoda`) ; majorité des commits du SM |

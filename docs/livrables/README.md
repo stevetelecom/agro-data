@@ -16,7 +16,7 @@ prouvent ce qu'il avance.
 |---|---|---|---|
 | Sprint 2 — Fondations | 28/10/2026 | [`SPRINT_2_REVIEW.md`](SPRINT_2_REVIEW.md) | `v2` |
 | Sprint 3 — Traitement | 04/11/2026 | [`SPRINT_3_REVIEW.md`](SPRINT_3_REVIEW.md) | `v3` |
-| Sprint 4 — Restitution et intégration | 11/11/2026 | [`SPRINT_4_PREPARATION.md`](SPRINT_4_PREPARATION.md) → `SPRINT_4_REVIEW.md` | `v-final` |
+| Sprint 4 — Restitution et intégration | 11/11/2026 | [`SPRINT_4_PREPARATION.md`](SPRINT_4_PREPARATION.md) → `SPRINT_4_REVIEW.md` | `v4-partiel` |
 
 Les rétrospectives sont regroupées dans [`RETROSPECTIVES.md`](RETROSPECTIVES.md),
 avec le suivi des actions d'un sprint sur l'autre.
@@ -26,7 +26,7 @@ avec le suivi des actions d'un sprint sur l'autre.
 | Document | Contenu |
 |---|---|
 | [`CRITERES_ACCEPTATION.md`](CRITERES_ACCEPTATION.md) | les 8 critères du CDC §17, leur statut et leur preuve exécutable (tests, routes, commits) |
-| [`PV_RECETTE.md`](PV_RECETTE.md) | procès-verbal de recette du tag `v-final` : preuves, réserves, commandes de démonstration |
+| [`PV_RECETTE.md`](PV_RECETTE.md) | procès-verbal de recette du tag `v4-partiel` : preuves, réserves, commandes de démonstration |
 
 ## Versions du dossier
 
@@ -34,7 +34,7 @@ avec le suivi des actions d'un sprint sur l'autre.
 |---|---|---|
 | `v2` | 28/10/2026 | structure du dépôt, CI, contrat JSON v1.0, maquette et design system |
 | `v3` | 04/11/2026 | contrat v1.2, comptes de démo, indice d'infestation et prix prédictif v1 |
-| `v-final` | 11/11/2026 | intégration de bout en bout, recette, dossier final |
+| `v4-partiel` | 11/11/2026 | intégration de bout en bout, recette, dossier final |
 
 Les tags Git correspondants sont annotés : leur message précise si l'incrément
 est complet ou partiel, et renvoie au compte-rendu.

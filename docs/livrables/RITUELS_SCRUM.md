@@ -39,7 +39,7 @@ deux profils design et un profil développement intermédiaire.
 |---|---|---|
 | Product Backlog | `docs/PRODUCT_BACKLOG.md` (PB-01 à PB-15) | ordonné par le PO, priorité Must / Should / Could, estimation S / M / L |
 | Sprint Backlog | issues GitHub + milestone du sprint | une issue = une tâche, un seul assigné, une estimation |
-| Incrément | branche `main` + tags `v2`, `v3`, `v-final` | `main` reste fonctionnelle à tout moment |
+| Incrément | branche `main` + tags `v2`, `v3`, `v4-partiel` | `main` reste fonctionnelle à tout moment |
 | Tableau Kanban | GitHub Project `stevetelecom/projects/2` | colonnes **À faire**, **En cours**, **Terminé** ; une carte par issue |
 | Contrat d'échange | `docs/CONTRAT_JSON.md` | référence unique, toute évolution se fait dans le même commit que le schéma |
 
@@ -64,7 +64,7 @@ Le Kanban est public :
 |---|---|---|---|---|
 | Sprint 2 — Fondations | 22/10/2026 | **28/10/2026** | chaîne minimale simulateur → API → base, contrat JSON, maquettes | `v2` |
 | Sprint 3 — Traitement | 29/10/2026 | **04/11/2026** | pipeline, chiffrement, indice, prototype IA, authentification | `v3` |
-| Sprint 4 — Restitution | 05/11/2026 | **11/11/2026** | dashboard, API REST, démonstration de bout en bout | `v-final` |
+| Sprint 4 — Restitution | 05/11/2026 | **11/11/2026** | dashboard, API REST, démonstration de bout en bout | `v4-partiel` |
 
 Les dates de livraison sont celles du cahier des charges §16. Elles **ne sont
 pas décalées** : un incrément incomplet est présenté tel quel en Review, avec
@@ -105,7 +105,7 @@ accepte l'incrément.
 - Le mot-clé `Closes #N` dans le message ferme l'issue et déplace la carte en
   **Terminé** automatiquement ; `Refs #N` relie sans fermer.
 - Aucune fusion directe dans `main` sans PR relue ; le Scrum Master valide.
-- Tags annotés `v2`, `v3`, `v-final` sur `main`.
+- Tags annotés `v2`, `v3`, `v4-partiel` sur `main`.
 
 ---
 

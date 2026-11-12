@@ -11,7 +11,7 @@ Scrum Master : MEKONTSO Olivier Steve - Product Owner : MESSANGA MESSANGA Mike
 - [Product Backlog](docs/PRODUCT_BACKLOG.md)
 - [Cahier des charges](docs/CAHIER_DES_CHARGES.md)
 - [Plan de codage](docs/PLAN_DE_CODAGE.md)
-- [Contrat d'échange JSON](docs/CONTRAT_JSON.md) : format des mesures et des lectures, version 1.2
+- [Contrat d'échange JSON](docs/CONTRAT_JSON.md) : format des mesures et des lectures, version 1.3
 - [Design system](docs/DESIGN_SYSTEM.md) : palette, composants, écrans, écarts avec le backend
 - [Maquette interactive](maquettes/agro-data-maquette.html) : 6 écrans, thème cacao, mode sombre
 - [Rituels Scrum](docs/livrables/RITUELS_SCRUM.md) : rôles, rituels, Definition of Ready et Done
@@ -19,6 +19,7 @@ Scrum Master : MEKONTSO Olivier Steve - Product Owner : MESSANGA MESSANGA Mike
 - [Issues](https://github.com/stevetelecom/agro-data/issues) : une issue par tâche, assignée et priorisée
 - [Kanban](https://github.com/users/stevetelecom/projects/2) : colonnes À faire / En cours / Terminé
 - [Milestones](https://github.com/stevetelecom/agro-data/milestones) : Sprint 2, Sprint 3, Sprint 4
+- Livraison : tag `v4-partiel` (incrément partiel, voir [SPRINT_4_REVIEW](docs/livrables/SPRINT_4_REVIEW.md))
 
 ## Démarrage local
 

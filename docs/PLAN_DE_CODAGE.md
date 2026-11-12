@@ -37,7 +37,7 @@ agro-data/
 │   ├── CAHIER_DES_CHARGES.md
 │   ├── PLAN_DE_CODAGE.md
 │   ├── PRODUCT_BACKLOG.md
-│   └── livrables/                  # versions v2, v3, final du dossier
+│   └── livrables/                  # versions v2, v3, v4-partiel du dossier
 ├── simulator/                      # Bloc C (simulation) - Mounpain
 │   ├── generator.py                # génération des mesures JSON
 │   ├── scenarios.py                # sain, humidité critique, coupure réseau
@@ -107,7 +107,7 @@ Références officielles à consulter avant d'implémenter : documentation FastA
 - Une branche par module : `feature/<module>-<prénom>` (exemple : `feature/api-ingestion-mourad`).
 - Un commit après chaque fonctionnalité terminée, message au format `type(portée): description` (types : `feat`, `fix`, `docs`, `test`, `refactor`).
 - Fusion dans `main` par Pull Request, relue par un autre membre, validée par le Scrum Master.
-- Tags de version : `v2` (28 octobre), `v3` (4 novembre), `v-final` (11 novembre).
+- Tags de version : `v2` (28 octobre), `v3` (4 novembre), `v4-partiel` (11 novembre).
 
 ### Définition de « terminé » (DoD)
 Un ticket est terminé quand : le code est commenté, les tests passent, la revue est faite, la fusion dans `main` est effectuée, et le Product Owner a validé le critère d'acceptation.
@@ -167,7 +167,7 @@ Objectif : démonstration complète de bout en bout.
 |---|---|---|
 | Mourad | Routes de gestion (parcelles, appareils, abonnés), API REST de consultation, limitation de débit, documentation OpenAPI | Documentation interactive accessible, tests passés |
 | Mounpain | Intégration finale simulateur ou boîtier, options de configuration, documentation du câblage | Démonstration d'acquisition réelle ou simulée |
-| Olivier | Intégration de bout en bout, bascule du diagnostic IA vers le serveur, prix prédictif v2, tag `v-final`, dossier final | Scénario de démonstration reproductible |
+| Olivier | Intégration de bout en bout, bascule du diagnostic IA vers le serveur, prix prédictif v2, tag `v4-partiel`, dossier final | Scénario de démonstration reproductible |
 | Angue | Finition visuelle, accessibilité, cohérence sur téléphone, tablette et ordinateur | Revue de design validée |
 | Patrick | Tableau jQWidgets animé, graphiques complets, modals CRUD, notifications toast sur chaque action validée | Fonctionnalités de gestion opérationnelles |
 | Mike (PO) | Recette finale selon les critères d'acceptation (section 17 du cahier des charges), préparation de la démonstration | Procès-verbal de recette |
@@ -192,7 +192,7 @@ Objectif : démonstration complète de bout en bout.
 - Un historique de **commits** par membre et par branche.
 - Une **Sprint Review** à la fin de chaque sprint, avec démonstration au Product Owner et compte-rendu dans `docs/livrables/`.
 - Une **Rétrospective** hebdomadaire consignée dans le dossier.
-- Les trois **tags** `v2`, `v3`, `v-final`.
+- Les trois **tags** `v2`, `v3`, `v4-partiel`.
 
 ## 8. Risques techniques et plan B
 

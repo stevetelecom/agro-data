@@ -6,7 +6,7 @@
 | **Début** | 05/11/2026 |
 | **Livraison** | **11/11/2026** (cahier des charges §16) |
 | **Revue prévue** | 11/11/2026, avec le PO |
-| **Tag** | `v-final` |
+| **Tag** | `v4-partiel` (nommé `v-final` à la planification) |
 | **Auteur** | MEKONTSO Olivier Steve (SM), issue #24 |
 
 Ce document sert de Sprint Backlog lisible et de scénario de démonstration. Il
@@ -28,7 +28,7 @@ REST.
 |---|---|---|---|---|
 | #18 | CRUD parcelles/appareils/abonnés, API REST, rate limiting | Mourad | PR #25 | champs `village` / `surface_ha` à ajouter au modèle `Plot` |
 | #19 | Intégration finale simulateur/boîtier, câblage | Mounpain | #6 | #6 non commencé |
-| #20 | Intégration E2E, bascule IA, prix v2, tag `v-final` | Olivier | PR #25, #13 routes, #14 | point de convergence |
+| #20 | Intégration E2E, bascule IA, prix v2, tag `v4-partiel` | Olivier | PR #25, #13 routes, #14 | point de convergence |
 | #21 | Finition visuelle, accessibilité, responsive | Olivier | #15, #16 | accessibilité absente de la maquette |
 | #22 | Tableau animé, graphiques, modals CRUD, toasts | Patrick | #16, PR #25 | jQWidgets + Chart.js à intégrer |
 | #23 | Recette finale, PV, préparation de la démo | Mike (PO) | tous | PO indisponible |
@@ -99,7 +99,7 @@ des données simulées. Dans ce cas :
 | Rétrospective finale | `RETROSPECTIVES.md` § Sprint 4 | SM |
 | Procès-verbal de recette | `docs/livrables/PV_RECETTE.md` | PO |
 | Preuves des 8 critères CDC §17 | `docs/livrables/CRITERES_ACCEPTATION.md` | SM (#20) |
-| Tag `v-final` | Git | SM (#20) |
+| Tag `v4-partiel` | Git | SM (#20) |
 | Documentation OpenAPI | `GET /docs` | Mourad (#18) |
 
 ## 7. Décisions attendues

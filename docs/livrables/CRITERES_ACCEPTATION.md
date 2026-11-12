@@ -20,10 +20,10 @@ leur reste-à-faire est explicite : aucune promesse au-delà de ce qui tourne.
 | 2 | Une coupure réseau ne perd aucune mesure | ✅ | `test_simulator.py::test_reprise_apres_coupure_envoie_tout_une_seule_fois` + démonstration CLI réelle (24 h hors ligne, 24 renvoyées, 0 doublon) |
 | 3 | Plus de 48 h > 85 % déclenche une alerte | ✅ | `test_kpis.py` (alerte à 48 h, pas avant 47 h) |
 | 4 | Le prototype IA retourne un drapeau et un score | 🟡 | `test_diagnostic.py`, `ai/infer.py` (stub, `is_demo: true`) |
-| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | Dashboard branché sur `/api/v1/kpis` et `/prices/forecast`, 17 tests JS, `test_kpis.py` |
+| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | Dashboard branché sur `/api/v1/kpis` et `/prices/forecast`, 18 tests JS, `test_kpis.py` |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py` |
 | 7 | Chaque action de gestion affiche un toast | ✅ | `dashboard/js/toast.js` + appels `showToast` après chaque CRUD (`app.js`) |
-| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 2 PR (#25, fusion du dashboard) ; 40 des 45 commits de `main` sont du SM ; Mounpain : 2 commits sur `sahoda`, fusionnés le 11/11 (`06e5d66`) |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | 1 PR (#25) et 1 branche fusionnée sans PR (dashboard) ; 51 des 58 commits de `main` sont du SM ; Mounpain : 2 commits sur `sahoda`, fusionnés le 11/11 (`06e5d66`) |
 
 Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · ❌ non couvert.
 
@@ -96,7 +96,7 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
 - Les mêmes données restent accessibles par l'API avec le jeton de l'acheteur :
   `GET /api/v1/kpis`, `/prices/forecast`, `/measurements`, `/plots`, `/devices`,
   `/subscribers`.
-- Preuves : **17 tests JS** (`node --test js/*.test.js`), dont l'égalité de la
+- Preuves : **18 tests JS** (`node --test js/*.test.js`), dont l'égalité de la
   formule de prix et l'adaptation de la courbe §4.5 ; `backend/tests/test_kpis.py`
   (dont `estimated_healthy_volume_kg`) ; vérification par appels API sur une base
   neuve (8 mesures et une parcelle créées au démarrage, connexion
@@ -125,7 +125,7 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
   d'une parcelle, d'un appareil et d'un abonné, et suppression (« Parcelle
   supprimée. », « Appareil supprimé. », « Abonné supprimé. »).
 - Preuves : lecture du câblage `app.js` → `toast.js`, tests JS de validation des
-  formulaires CRUD (14 verts). Aucun test automatisé ne couvre le rendu visuel
+  formulaires CRUD (18 verts). Aucun test automatisé ne couvre le rendu visuel
   du toast : à confirmer à l'écran pendant la démonstration.
 
 ### 8. L'historique Git montre le travail de chaque membre — 🟡
@@ -152,9 +152,9 @@ Légende : ✅ couvert et testé · 🟡 partiel, reste-à-faire documenté · �
 ## Comment rejouer les preuves
 
 ```bash
-cd backend && pytest -q                 # 95 tests, dont test_e2e.py et test_simulator.py
+cd backend && pytest -q                 # 106 tests, dont test_e2e.py et test_simulator.py
 python scripts/demo_e2e.py              # backend démarré : parcours complet
-cd dashboard && node --test js/*.test.js  # 17 tests des modules du dashboard
+cd dashboard && node --test js/*.test.js  # 18 tests des modules du dashboard
 ```
 
 ---

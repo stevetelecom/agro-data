@@ -5,10 +5,10 @@
 | **Sprint** | Sprint 4 — Restitution et intégration |
 | **Échéance prévue** | 11/11/2026 (cahier des charges §16) |
 | **Revue prévue le** | 11/11/2026 |
-| **Tag** | `v-final` — annoté, partiel (voir §10) |
+| **Tag** | `v4-partiel` — annoté, partiel (voir §10) |
 | **Participants** | MEKONTSO Olivier Steve (SM) |
 | **PO** | MESSANGA MESSANGA Mike — **validations en attente** |
-| **Rédigé le** | 11/11/2026, sur l'état de `main` après livraison du bloc C (CI verte, 92 tests backend + 14 tests JS) |
+| **Rédigé le** | 11/11/2026, sur l'état de `main` après livraison du bloc C (CI verte, 106 tests backend + 18 tests JS) |
 
 > **Note de méthode.** Ce compte-rendu décrit l'état réel du dépôt et du Kanban,
 > au soir de l'échéance, et non les intentions du Sprint Backlog. La version du
@@ -40,13 +40,13 @@ flashé, faute de boîtier : c'est la seule réserve matérielle de la démo.
 |---|---|---|---|
 | #18 | CRUD parcelles/appareils/abonnés, API REST, rate limiting | Mourad | ✅ Livré et fusionné ; `village`, `surface_ha` et `reference_volume_kg` ajoutés le 11/11 |
 | #19 | Intégration finale simulateur/boîtier, câblage | Mounpain | 🟡 Non livré par son titulaire, repris par le SM le 11/11 : simulateur, tampon et firmware écrits ; firmware non flashé |
-| #20 | Intégration E2E, bascule IA, prix v2, tag `v-final` | Olivier (SM) | 🟡 E2E complète avec le simulateur, tag créé, prix v2 non fait |
+| #20 | Intégration E2E, bascule IA, prix v2, tag `v4-partiel` | Olivier (SM) | 🟡 E2E complète avec le simulateur, tag `v4-partiel` créé, prix v2 non fait |
 | #21 | Finition visuelle, accessibilité, responsive | Olivier (SM) | 🟡 Technique fait, revue de design non validée par le PO |
 | #22 | Tableau animé, graphiques, modals CRUD, toasts | Patrick | ✅ Livré le 11/11 (branche fusionnée) |
-| #23 | Recette finale, PV, préparation de la démo | Mike (PO) | ❌ PV de recette absent |
+| #23 | Recette finale, PV, préparation de la démo | Mike (PO) | ✅ `PV_RECETTE.md` rédigé, validé par le SM mandaté (accepté avec réserves) |
 | #24 | Rituels Scrum, livrables, comptes-rendus | Olivier (SM) | ✅ Reviews 2 à 4, rétrospectives, critères et tag |
 
-Tickets du Sprint 4 : **2 terminés**, **4 partiels**, **1 non commencé** sur 7.
+Tickets du Sprint 4 : **4 terminés**, **3 partiels**, **0 non commencé** sur 7.
 
 ## 3. Ce qui a été livré
 
@@ -60,8 +60,9 @@ Tickets du Sprint 4 : **2 terminés**, **4 partiels**, **1 non commencé** sur 7
 - `GET /api/v1/kpis` et `GET /api/v1/prices/forecast` (RM2, RM3 v1, audit RM5),
   protégés par JWT.
 - `POST /api/v1/diagnostic` : validation JPEG/PNG ≤ 5 Mo, drapeau + score.
-- **92 tests verts** en CI (`pytest -q`), dont `test_contract.py` (document ↔
-  schémas Pydantic) et `test_e2e.py` (scénario de démonstration).
+- **106 tests verts** en CI (`pytest -q`), dont `test_contract.py` (document ↔
+  schémas Pydantic, y compris les modèles de lecture §4.4 à §4.7) et
+  `test_e2e.py` (scénario de démonstration).
 
 ### 3.2 Dashboard — branche de NTPbreak fusionnée le 11/11
 
@@ -76,8 +77,8 @@ Il est désormais dans `main` (commit de fusion `6d6e337`) :
   mesures, parcelles, appareils, abonnés, vue terrain, journal.
 - `grids.js` (jQWidgets), `charts.js` (Chart.js), `modals.js` (formulaires CRUD),
   `toast.js` (confirmation après chaque action), `metrics.js` (calculs d'indices).
-- **14 tests JS** verts (`node --test js/*.test.js`), vendorisation locale de
-  jQuery/jQWidgets/Chart.js (démo hors ligne).
+- **18 tests JS** verts (`node --test js/*.test.js`), exécutés par la CI,
+  vendorisation locale de jQuery/jQWidgets/Chart.js (démo hors ligne).
 - Corrections apportées à la fusion : `allow_origins=["*"]` en doublon supprimé
   (le port 8080 rejoint les origines autorisées), `.env` retiré du versionnement,
   README débarrassé de comptes de démonstration inexistants.
@@ -115,9 +116,10 @@ persistées, tampon vidé, aucun doublon.
 
 ### 3.4 Documentation et pilotage
 
-- `docs/CONTRAT_JSON.md` v1.2 (gelé), `docs/CRITERES_ACCEPTATION.md`,
-  `docs/RITUELS_SCRUM.md`, `docs/RETROSPECTIVES.md`, reviews 2 à 4.
-- Kanban remis à jour le 10/11 puis le 11/11 : 11 issues fermées avec preuves,
+- `docs/CONTRAT_JSON.md` v1.3 (gelé), `docs/livrables/CRITERES_ACCEPTATION.md`,
+  `docs/livrables/RITUELS_SCRUM.md`, `docs/livrables/RETROSPECTIVES.md`,
+  reviews 2 à 4.
+- Kanban remis à jour le 10/11 puis le 11/11 : 21 issues fermées avec preuves,
   cases cochées sur #4, #7, #18, #24.
 
 ## 4. Ce qui n'a pas été livré
@@ -140,10 +142,10 @@ persistées, tampon vidé, aucun doublon.
 | 2 | Une coupure réseau ne perd aucune mesure | ✅ | `test_simulator.py` (5 tests du tampon + rejeu API) ; 24 h hors ligne renvoyées sans doublon |
 | 3 | Plus de 48 h au-dessus de 85 % déclenche une alerte | ✅ | `test_infestation.py`, `test_kpis.py`, routes `/kpis` |
 | 4 | Le prototype IA renvoie un drapeau et un score | 🟡 | route livrée, `is_demo: true`, modèle non entraîné, `ai/dataset` vide |
-| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | dashboard branché sur `/kpis` et `/prices/forecast` + 17 tests JS + `test_kpis.py` |
+| 5 | L'acheteur voit les KPIs et retrouve les mêmes données par l'API | ✅ | dashboard branché sur `/kpis` et `/prices/forecast` + 18 tests JS + `test_kpis.py` ; `GET /plots` expose les mêmes champs calculés que le dashboard |
 | 6 | Les entrées invalides ou malveillantes sont rejetées | ✅ | `test_measurements.py`, `test_security.py`, `device_id` contraint |
 | 7 | Chaque action de gestion affiche un toast | ✅ | `toast.js` branché sur chaque CRUD (`app.js`) |
-| 8 | L'historique Git montre le travail de chaque membre | 🟡 | voir §9 : 3 apports extérieurs, 40 des 45 commits de `main` du SM, Mounpain 2 commits sur `sahoda` |
+| 8 | L'historique Git montre le travail de chaque membre | 🟡 | voir §9 : 3 apports extérieurs, 51 des 58 commits de `main` du SM, Mounpain 2 commits sur `sahoda` |
 
 Bilan : **6 validés**, **2 partiels**, **0 non couvert**. Les critères 5 et 7,
 annoncés non couverts le 10/11, sont couverts depuis la fusion du dashboard ; le
@@ -183,17 +185,17 @@ n'a pas été compilé, la démonstration s'appuie sur le simulateur.
 
 | Indicateur | Valeur |
 |---|---|
-| Issues du dépôt (total / fermées) | 24 / 14 |
-| Issues du Sprint 4 terminées | 5 sur 7, dont 3 reprises par le SM (#6, #12, #19) |
-| Tests automatisés sur `main` | 92 backend + 14 JS |
-| Commits sur `main` | 45 |
-| Commits du SM / de NTPbreak / de Mourad | 40 / 3 / 2 |
+| Issues du dépôt (total / fermées) | 24 / 21 |
+| Issues du Sprint 4 terminées | 4 terminées et 3 partiels sur 7, dont 3 repris par le SM (#6, #12, #19) |
+| Tests automatisés sur `main` | 106 backend + 18 JS |
+| Commits sur `main` | 58 |
+| Commits du SM / de NTPbreak / de Mourad / de 73EGA | 51 / 3 / 2 / 2 |
 | Pull requests fusionnées | 1 (#25) ; 1 branche fusionnée sans PR |
 | Critères §17 validés | 6 sur 8 |
 
 ## 9. Écarts de processus
 
-1. **Travail direct sur `main`** : 40 des 45 commits sont allés directement sur
+1. **Travail direct sur `main`** : 51 des 58 commits sont allés directement sur
    `main`, sans PR ni revue. C'est un **choix assumé du SM** (seul développeur
    sur le backend, itérations courtes), qui s'écarte de la DoD et de l'action
    R2-4 ; seule la PR #25 est passée par une branche et une revue. L'historique
@@ -219,19 +221,22 @@ n'a pas été compilé, la démonstration s'appuie sur le simulateur.
 5. **PO indisponible** : aucune validation formelle depuis le Sprint 2, ce qui
    bloque #4, #7, #17, #21 et #23.
 
-## 10. Tag `v-final`
+## 10. Tag `v4-partiel`
 
-Tag **annoté** sur l'état livré, recréé après la fusion du dashboard. Son message
-liste explicitement le livré et le non-livré, sans quoi il laisserait croire à un
-incrément complet.
+Le tag de livraison s'appelle **`v4-partiel`** : l'incrément du Sprint 4 n'est
+pas complet, et la consigne interdisait un tag `v-final` tant que le prix v2,
+l'IA entraînée et le firmware flashé ne sont pas livrés. Le tag est **annoté**
+et son message liste explicitement le livré et le non-livré.
 
 - `v2` et `v3` : incréments des Sprints 2 et 3, tous deux partiels.
-- `v-final` : état démontré du Sprint 4 — backend complet (95 tests), dashboard
-  connexion + CRUD + graphiques + toasts + vue terrain (17 tests), simulateur et
-  store-and-forward testés, démonstration de bout en bout verte, firmware écrit
-  mais non flashé ; sans prix v2 et sans IA entraînée.
-- Le tag est poussé avec `main` (`git push origin main --follow-tags`), recréé
-  sur le commit de livraison du bloc C.
+- `v4-partiel` : état démontré du Sprint 4 — backend complet (106 tests),
+  dashboard connexion + CRUD + graphiques + toasts + vue terrain (18 tests),
+  simulateur et store-and-forward testés, démonstration de bout en bout verte,
+  firmware écrit mais non flashé ; **sans prix v2, sans IA entraînée et sans
+  firmware compilé**.
+- Le tag est poussé avec `main` (`git push origin main --follow-tags`) et pointe
+  sur le commit de livraison corrigé après l'audit.
 
 Si le PO valide des critères supplémentaires pendant la séance, le tag reste
-valable : il décrit l'état du code, pas le statut de la recette.
+valable : il décrit l'état du code, pas le statut de la recette. Le nom
+`v-final` est réservé à un incrément réellement complet.

@@ -177,11 +177,11 @@ Alimente les quatre cartes et le graphique d'humidité de l'écran 2 de la maque
 |---|---|---|
 | `global_infestation_index` | entier 0 à 100 | moyenne des indices par parcelle (RM2) |
 | `level` | chaîne | `faible` si l'indice < 30, `modere` de 30 à 60, `eleve` si > 60 |
-| `active_alerts` | entier | nombre de parcelles avec plus de 48 h consécutives au-dessus de 85 % (RM1) |
+| `active_alerts` | entier | nombre de parcelles avec 48 h ou plus consécutives au-dessus de 85 % (RM1) |
 | `avg_air_humidity_pct` | réel | humidité de l'air moyenne sur la fenêtre |
-| `humidity_delta_7d` | réel | écart en points avec la moyenne des 7 jours précédents |
+| `humidity_delta_7d` | réel | écart en points avec la moyenne des 7 jours qui précèdent la fenêtre courante, quelle que soit la valeur de `days` |
 | `estimated_healthy_volume_pct` | entier | `max(20, 100 − 0,7 × indice)` — **hypothèse de démonstration**, à calibrer avec l'ICCO |
-| `estimated_healthy_volume_kg` | réel | somme, par parcelle, de `reference_volume_kg × (1 − indice / 100)` ; 0 pour un boîtier non rattaché |
+| `estimated_healthy_volume_kg` | réel | somme, par parcelle, de `reference_volume_kg × (1 − indice / 100)` ; une parcelle sans mesure garde un indice nul ; 0 pour un boîtier non rattaché |
 | `plots_monitored` | entier | nombre de parcelles suivies |
 | `humidity_series` | tableau | une série de `days` points par parcelle suivie, `under_alert` à `true` si la parcelle est en alerte RM1 |
 
@@ -228,9 +228,12 @@ Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `
 ```json
 {
   "id": 1,
+  "code": "P-NK",
   "name": "Parcelle Nkoulou",
+  "location_label": "Ambam centre",
   "village": "Ambam centre",
   "surface_ha": 3.2,
+  "reference_volume_kg": 1200,
   "hours_above_85": 62,
   "ia_detection_rate": 0.55,
   "infestation_index": 82,
@@ -240,7 +243,10 @@ Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `
 
 | Champ | Type | Écriture | Règle |
 |---|---|---|---|
-| `name` | chaîne | oui | 1 à 40 caractères, obligatoire |
+| `id` | entier | non | identifiant technique |
+| `code` | chaîne | oui | 1 à 64 caractères, unique |
+| `name` | chaîne | oui | 1 à 255 caractères, obligatoire |
+| `location_label` | chaîne | oui | 0 à 255 caractères, libellé d'affichage |
 | `village` | chaîne | oui | 1 à 40 caractères, obligatoire |
 | `surface_ha` | réel | oui | > 0, pas à 0,1 près |
 | `reference_volume_kg` | réel | oui | ≥ 0, défaut 0 ; base du KPI « volume sain en kg » |
@@ -249,7 +255,7 @@ Alimente le second graphique de l'écran 2. Authentification JWT. Paramètre : `
 | `infestation_index` | entier | non | RM2 |
 | `level` | chaîne | non | `faible`, `modere`, `eleve` |
 
-Le formulaire de la maquette laisse saisir `hours_above_85` et `ia_detection_rate` : c'est un raccourci de démonstration. Dans l'API réelle, ces deux valeurs sont **en lecture seule**, sinon l'indice devient falsifiable.
+Le formulaire de la maquette laisse saisir `hours_above_85` et `ia_detection_rate` : c'est un raccourci de démonstration. Dans l'API réelle, ces deux valeurs sont **en lecture seule**, sinon l'indice devient falsifiable. Les quatre champs calculés sont recalculés à chaque lecture sur la fenêtre de 7 jours ; une parcelle sans mesure renvoie `0`, `0.0`, `0` et `faible`.
 
 `DELETE /api/v1/plots/{id}` est refusé (`409`) si des appareils sont encore rattachés à la parcelle.
 
@@ -357,3 +363,4 @@ Ces points ne bloquent pas le développement, mais doivent être tranchés avant
 | 1.0 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Première version figée à partir du CDC §12.1 et du schéma Pydantic de la PR #25 |
 | 1.1 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Ajout des modèles de lecture du dashboard (§4.4 à §4.7) alignés sur la maquette `agro-data-maquette.html` |
 | 1.2 | 10/11/2026 | MEKONTSO Olivier Steve (SM) | Comptes de démonstration alignés sur l'écran de connexion (§4.8, commit `d524467`) |
+| 1.3 | 11/11/2026 | Audit de fin de projet | §4.6 : exemple et tableau complétés avec les champs réellement renvoyés, dont `id`, `code`, `location_label` et `reference_volume_kg` ; §4.4 : seuil d'alerte explicité « 48 h ou plus », `humidity_delta_7d` figé sur 7 jours, volume sain incluant les parcelles sans mesure |
