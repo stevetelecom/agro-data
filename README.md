@@ -16,6 +16,7 @@ Scrum Master : MEKONTSO Olivier Steve - Product Owner : MESSANGA MESSANGA Mike
 - [Maquette interactive](maquettes/agro-data-maquette.html) : 6 écrans, thème cacao, mode sombre
 - [Rituels Scrum](docs/livrables/RITUELS_SCRUM.md) : rôles, rituels, Definition of Ready et Done
 - [Comptes-rendus de sprint](docs/livrables/) : revues, rétrospectives et plan de démonstration
+- [Rapport de présentation](docs/livrables/RAPPORT_PRESENTATION.md) : description du projet, organisation des tâches et respect des délais
 - [Issues](https://github.com/stevetelecom/agro-data/issues) : une issue par tâche, assignée et priorisée
 - [Kanban](https://github.com/users/stevetelecom/projects/2) : colonnes À faire / En cours / Terminé
 - [Milestones](https://github.com/stevetelecom/agro-data/milestones) : Sprint 2, Sprint 3, Sprint 4

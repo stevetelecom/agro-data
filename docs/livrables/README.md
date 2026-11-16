@@ -29,6 +29,12 @@ avec le suivi des actions d'un sprint sur l'autre.
 | [`PV_RECETTE.md`](PV_RECETTE.md) | procès-verbal de recette du tag `v4-partiel` : preuves, réserves, commandes de démonstration |
 | [`AUDIT.md`](AUDIT.md) | audit indépendant de fin de projet : constats A1-A22, preuves, correctifs appliqués |
 
+## Présentation
+
+| Document | Contenu |
+|---|---|
+| [`RAPPORT_PRESENTATION.md`](RAPPORT_PRESENTATION.md) | rapport de présentation du 16/11/2026 : description du projet, organisation des tâches, respect des délais et lien avec le cours GSA 712 / GSI 712 |
+
 ## Versions du dossier
 
 | Version | Date | Contenu |
